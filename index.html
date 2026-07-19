@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+    dialog::backdrop {
+        background: rgba(0,0,0,.45);
+    }
+</style>
+<style>
+  /* Blokkeer scroll zodra er een open dialog is */
+  body:has(dialog[open]) {
+    overflow: hidden;
+    scrollbar-gutter: stable; /* voorkom layout shift */
+  }
+</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="/icons/icon-192.png" />
+<title>MetMekaere</title>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+</html>

@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+match /databases/{database}/documents {
+
+
+// Publiek mag lezen (app toont activiteiten zonder login)
+match /activities/{dayId} {
+allow read: if true;
+// Schrijven alleen voor specifieke ingelogde e-mails
+allow write, update, delete: if request.auth != null && (
+request.auth.token.email.matches('^(luciennedraaijer@hotmail.com)$') ||
+request.auth.token.email.matches('^(j.f.bergsma.jb@gmail.com)$')
+);
+}
+
+
+// Optionele meta-collectie
+match /meta/{doc} {
+allow read: if true;
+allow write, update, delete: if request.auth != null && (
+request.auth.token.email.matches('^(luciennedraaijer@hotmail.com)$') ||
+request.auth.token.email.matches('^(j.f.bergsma.jb@gmail.com)$')
+);
+}
+}
+}

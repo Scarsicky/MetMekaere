@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MetMekaere Adventskalender</string>
+    <string name="title_activity_main">MetMekaere Adventskalender</string>
+    <string name="package_name">nl.metmekaere.adventskalender</string>
+    <string name="custom_url_scheme">nl.metmekaere.adventskalender</string>
+</resources>
