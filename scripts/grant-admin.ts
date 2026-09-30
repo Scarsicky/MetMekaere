@@ -6,9 +6,18 @@
  *   npm run admin:grant -- jouw@email.nl --intrekken
  *
  * Bestaat het account nog niet, dan wordt het aangemaakt — geef dan een
- * wachtwoord mee. Beheerder ben je door de custom claim `admin: true`; alleen
- * een account hebben is niet genoeg. Er staat dus nergens een open registratie
- * waarmee iemand zichzelf toegang kan geven.
+ * wachtwoord mee. Alleen een account hebben is niet genoeg om in het beheer te
+ * komen; er staat dus nergens een open registratie waarmee iemand zichzelf
+ * toegang kan geven.
+ *
+ * Dit script zet zowel de custom claim `admin: true` als een document in de
+ * collectie `admins`. Beide geven toegang.
+ *
+ * ZONDER SERVICE-ACCOUNT-SLEUTEL werkt dit script niet tegen productie — het
+ * praat rechtstreeks met Firebase. Maak in dat geval het document met de hand
+ * aan in de Firebase-console: collectie `admins`, document-id is de UID van de
+ * gebruiker (te vinden onder Authentication). Dat geeft dezelfde toegang.
+ * Zie README.md, 'Jezelf beheerder maken'.
  *
  * Draait tegen de emulator als FIRESTORE_EMULATOR_HOST is gezet, en anders
  * tegen het echte project.

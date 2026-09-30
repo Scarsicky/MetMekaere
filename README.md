@@ -170,17 +170,35 @@ Na de eerste uitrol krijg je een adres als
 `https://metmekaere-web--metmekaere.europe-west4.hosted.app`. Daar ga je naar
 `/admin`.
 
-Geef jezelf eerst beheerrechten (dit praat rechtstreeks met Firebase Auth en
-werkt vanaf je eigen laptop):
+#### Jezelf beheerder maken
+
+Alleen een account aanmaken is niet genoeg — anders zou iedereen die zich
+registreert in het beheer kunnen. Er zijn twee manieren.
+
+**Via de Firebase-console** (geen sleutelbestand nodig, dus meestal de
+makkelijkste):
+
+1. [Authentication → Users](https://console.firebase.google.com/project/metmekaere/authentication/users)
+   → **Add user**, met je e-mailadres en een wachtwoord. Kopieer de **UID** die
+   je daarna ziet staan.
+2. [Firestore → Data](https://console.firebase.google.com/project/metmekaere/firestore/data)
+   → maak de collectie `admins` aan (als hij er nog niet is) met een document
+   waarvan het **document-id de UID uit stap 1 is**. Een veld `email` met je
+   adres is handig maar niet verplicht.
+
+Klaar. Inloggen kan meteen.
+
+**Of met het script**, als je een service-account-sleutel op deze computer hebt
+staan (`GOOGLE_APPLICATION_CREDENTIALS`). Zet dan eerst de emulator-regels in
+`.env.local` uit, anders maak je het account in de emulator aan:
 
 ```bash
 npm run admin:grant -- jouw@email.nl --wachtwoord EenGoedWachtwoord
 ```
 
-Zet daarvoor wel eerst de emulator-regels in `.env.local` uit, anders maak je
-het account in de emulator aan in plaats van in productie.
+#### De site vullen
 
-Log daarna in en ga naar **Opstarten**. Daar staat één knop die de startinhoud
+Log in en ga naar **Opstarten**. Daar staat één knop die de startinhoud
 plaatst — teksten, producten, verzendtarieven, de kalenderdagen. Op datzelfde
 scherm staat of Mollie en de mail goed staan, en kun je een testmail sturen.
 

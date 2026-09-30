@@ -20,8 +20,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    /*
+     * Beheerder ben je met de custom claim, of met een document in `admins`.
+     * Die tweede weg maakt het mogelijk iemand toegang te geven vanuit de
+     * Firebase-console, zonder service-account-sleutel. Schrijven naar `admins`
+     * kan vanuit een browser niet — zie hieronder — dus alleen wie bij de
+     * console kan, kan iemand toelaten.
+     */
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
 
     // De adventskalender: iedereen mag lezen, alleen een beheerder mag schrijven.
