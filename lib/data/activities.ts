@@ -18,11 +18,27 @@ import { ADVENT_DAYS, type AdventActivity } from '@/types';
 export { ADVENT_DAYS };
 export type { AdventActivity };
 
+/**
+ * De oude advent-app vulde nieuwe dagen met de plaatshouder `Dag 1`, `Dag 2`,
+ * enzovoort. Die staan nog in de database. Zouden we ze als echte titel
+ * behandelen, dan meldt de kalender 24 ingevulde dagen terwijl er niets in
+ * staat, en zien bezoekers 'Dag 1' in plaats van 'Nog even geduld'.
+ *
+ * We negeren alleen de exacte plaatshouder van de bijbehorende dag, dus
+ * `Dag 7` bij dag 7. Een echte titel die toevallig zo heet is ondenkbaar; een
+ * titel als `Dag van de koffie` blijft gewoon staan.
+ */
+export function isPlaceholderTitle(title: string, day: number): boolean {
+  return new RegExp(`^dag\\s*${day}$`, 'i').test(title.trim());
+}
+
 function normalizeActivity(id: string, raw: Record<string, unknown>): AdventActivity {
   const day = typeof raw.day === 'number' ? raw.day : Number(id);
+  const rawTitle = typeof raw.title === 'string' ? raw.title : '';
+
   return {
     day: Number.isFinite(day) ? day : 0,
-    title: typeof raw.title === 'string' ? raw.title : '',
+    title: isPlaceholderTitle(rawTitle, day) ? '' : rawTitle,
     body: typeof raw.body === 'string' ? raw.body : '',
     location: typeof raw.location === 'string' ? raw.location : '',
     time: typeof raw.time === 'string' ? raw.time : '',
