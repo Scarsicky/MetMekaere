@@ -4,7 +4,7 @@ import { adminError, adminOk, type AdminActionState } from '@/lib/admin/action-s
 import { requireAdmin } from '@/lib/admin/auth';
 import { revalidateProducts } from '@/lib/admin/revalidate';
 import { getGeneralSettings } from '@/lib/data/settings';
-import { sendShippingNotice } from '@/lib/mail';
+import { sendCancellationNotice, sendShippingNotice } from '@/lib/mail';
 import {
   getOrder,
   markOrderShipped,
@@ -99,14 +99,33 @@ export async function cancelOrderAction(
   // Is de voorraad al afgeboekt, dan gaat hij terug — de artikelen zijn
   // immers weer verkoopbaar.
   if (order.stockApplied) await restockOrder(id);
-  await markOrderStatus(id, 'canceled');
+
+  /*
+   * `adminClosed` legt vast dat een mens dit besloot. Zonder die markering
+   * draait een late webhook van Mollie de annulering terug: de order gaat weer
+   * op betaald, de voorraad wordt opnieuw afgeboekt en de klant krijgt nog een
+   * bevestiging.
+   */
+  await markOrderStatus(id, 'canceled', { adminClosed: true });
+
+  const parts = ['Geannuleerd.'];
+  if (order.stockApplied) parts.push('De voorraad is teruggezet.');
+
+  if (formData.get('notify') !== 'nee') {
+    const general = await getGeneralSettings();
+    const updated = await getOrder(id);
+    const result = updated
+      ? await sendCancellationNotice(updated, general, text(formData, 'reason') || undefined)
+      : { sent: false, reason: 'order niet gevonden' };
+    parts.push(
+      result.sent
+        ? 'De klant heeft bericht gekregen.'
+        : `De mail aan de klant ging niet weg (${result.reason ?? 'onbekende reden'}).`,
+    );
+  }
 
   revalidateProducts();
-  return adminOk(
-    order.stockApplied
-      ? 'Geannuleerd. De voorraad is teruggezet.'
-      : 'Geannuleerd.',
-  );
+  return adminOk(parts.join(' '));
 }
 
 export async function refundOrderAction(
@@ -120,7 +139,22 @@ export async function refundOrderAction(
   if (!order) return adminError('Deze bestelling bestaat niet meer.');
 
   if (order.stockApplied) await restockOrder(id);
-  await markOrderStatus(id, 'refunded');
+  await markOrderStatus(id, 'refunded', { adminClosed: true });
+
+  const parts = ['Gemarkeerd als terugbetaald en voorraad teruggezet.'];
+
+  if (formData.get('notify') !== 'nee') {
+    const general = await getGeneralSettings();
+    const updated = await getOrder(id);
+    const result = updated
+      ? await sendCancellationNotice(updated, general, text(formData, 'reason') || undefined)
+      : { sent: false, reason: 'order niet gevonden' };
+    parts.push(
+      result.sent
+        ? 'De klant heeft bericht gekregen.'
+        : `De mail aan de klant ging niet weg (${result.reason ?? 'onbekende reden'}).`,
+    );
+  }
 
   revalidateProducts();
   /*
@@ -128,7 +162,6 @@ export async function refundOrderAction(
    * automatiseren: terugbetalen is onomkeerbaar, en een verkeerde klik hier
    * zou echt geld kosten.
    */
-  return adminOk(
-    'Gemarkeerd als terugbetaald en voorraad teruggezet. Het bedrag stort je zelf terug in Mollie.',
-  );
+  parts.push('Het bedrag stort je zelf terug in Mollie.');
+  return adminOk(parts.join(' '));
 }

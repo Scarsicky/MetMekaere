@@ -204,6 +204,17 @@ export async function markOrderPaid(
     if (!snap.exists) return null;
 
     const order = normalizeOrder(snap.id, snap.data() as Record<string, unknown>);
+
+    /*
+     * Door de beheerder ingetrokken of terugbetaald: afblijven, ook als Mollie
+     * alsnog 'betaald' meldt. Zonder deze grendel zet een late webhook de order
+     * terug op betaald, boekt de voorraad opnieuw af en krijgt de klant nog een
+     * bevestiging.
+     */
+    if (order.adminClosed) {
+      return { firstTime: false, order, oversold: [] };
+    }
+
     const alreadyPaid = order.status === 'paid' || order.status === 'shipped';
 
     /* Voorraad afboeken — alleen de eerste keer. Alle leesacties moeten in een
@@ -265,9 +276,20 @@ export async function markOrderPaid(
   return result;
 }
 
-/** Voor mislukt, verlopen of geannuleerd: alleen de status bijwerken. */
-export async function markOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
-  await adminDb().collection(ORDERS).doc(orderId).set({ status }, { merge: true });
+/**
+ * Voor mislukt, verlopen of geannuleerd: alleen de status bijwerken.
+ *
+ * Met `adminClosed` leg je vast dat een mens dit besloot. Dat weegt zwaarder
+ * dan wat Mollie er later nog over meldt — zie `canSyncWithPayment`.
+ */
+export async function markOrderStatus(
+  orderId: string,
+  status: OrderStatus,
+  options: { adminClosed?: boolean } = {},
+): Promise<void> {
+  const update: Record<string, unknown> = { status };
+  if (options.adminClosed) update.adminClosed = true;
+  await adminDb().collection(ORDERS).doc(orderId).set(update, { merge: true });
 }
 
 /* ------------------------------------------------------------------ *

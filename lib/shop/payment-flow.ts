@@ -26,12 +26,41 @@ export type SyncResult =
   | { outcome: 'mismatch'; order: Order; detail: string }
   | { outcome: 'unknown' };
 
+/**
+ * Mag de betaalstatus van deze order nog worden bijgewerkt?
+ *
+ * Apart en puur, zodat het te testen is zonder Firestore — dit is precies de
+ * plek waar een fout duur uitpakt.
+ *
+ * Twee gevallen liggen vast:
+ *  - de order is al betaald of verstuurd: niets meer op te halen;
+ *  - de beheerder heeft de order zelf ingetrokken of terugbetaald: dat is een
+ *    besluit van een mens en wint van wat Mollie later nog meldt.
+ *
+ * Een order die bij Mollie strandde ('failed', 'expired', of afgebroken door de
+ * klant) mag wél opnieuw gecontroleerd worden: soms komt een betaling alsnog
+ * binnen.
+ */
+export function canSyncWithPayment(order: Pick<Order, 'status' | 'adminClosed'>): boolean {
+  if (order.adminClosed) return false;
+  return order.status !== 'paid' && order.status !== 'shipped' && order.status !== 'refunded';
+}
+
 export async function syncOrderWithPayment(orderId: string): Promise<SyncResult> {
   const order = await getOrder(orderId);
   if (!order) return { outcome: 'unknown' };
 
+  /*
+   * Door de beheerder afgesloten: niet aankomen. Anders draait een late
+   * webhook de annulering terug, boekt de voorraad opnieuw af en krijgt de
+   * klant nog een bevestiging.
+   */
+  if (order.adminClosed) {
+    return { outcome: 'failed', order, status: order.status };
+  }
+
   // Al afgehandeld: niets meer ophalen.
-  if (order.status === 'paid' || order.status === 'shipped') {
+  if (!canSyncWithPayment(order)) {
     return { outcome: 'paid', order, firstTime: false };
   }
   if (!order.molliePaymentId) {

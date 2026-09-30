@@ -184,7 +184,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             ) : null}
 
             <div className="mt-7">
-              <AddToCartForm product={product} maxQty={maxQty} soldOut={!available} />
+              <AddToCartForm product={product} maxQty={maxQty} soldOut={!available} tierRule={rule} />
             </div>
 
             {product.description ? (

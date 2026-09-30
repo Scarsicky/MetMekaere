@@ -365,6 +365,18 @@ export interface Order {
   stockApplied: boolean;
   /** Idempotentie-vlag: kortingscode is al als gebruikt geteld. */
   discountApplied: boolean;
+  /**
+   * Gezet wanneer de beheerder de order zelf heeft afgesloten (geannuleerd of
+   * terugbetaald).
+   *
+   * Nodig omdat 'geannuleerd' twee dingen kan betekenen: de klant brak af bij
+   * Mollie, of de eigenaar trok de order in. Het eerste mag later alsnog op
+   * betaald uitkomen; het tweede is een besluit van een mens en moet blijven
+   * staan. Zonder dit onderscheid zet één late webhook — of één bezoek aan de
+   * bedanktpagina — een ingetrokken order weer op betaald, boekt de voorraad
+   * opnieuw af en stuurt de klant nog een bevestiging.
+   */
+  adminClosed?: boolean;
   createdAt: Millis;
   paidAt?: Millis | null;
   shippedAt?: Millis | null;

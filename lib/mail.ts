@@ -346,6 +346,56 @@ export async function sendShippingNotice(order: Order, general: GeneralSettings)
   return send({ to: order.customer.email, subject, text, html, general });
 }
 
+/**
+ * Bericht dat een bestelling is ingetrokken.
+ *
+ * Bewust een eigen mail en niet de bestelbevestiging opnieuw: een klant die
+ * hoort dat zijn bestelling niet doorgaat, moet dat ook lezen — en niet nog
+ * eens 'bedankt voor je bestelling'.
+ */
+export async function sendCancellationNotice(
+  order: Order,
+  general: GeneralSettings,
+  reason?: string,
+): Promise<MailResult> {
+  const subject = `Je bestelling ${order.orderNumber} is geannuleerd`;
+  const refunded = order.status === 'refunded';
+
+  const text = [
+    `Hoi ${order.customer.name.split(' ')[0]},`,
+    '',
+    `Je bestelling ${order.orderNumber} is geannuleerd.`,
+    reason ? `\n${reason}` : '',
+    refunded
+      ? '\nHet betaalde bedrag krijg je terug. Afhankelijk van je bank staat dat binnen een paar werkdagen op je rekening.'
+      : '',
+    '',
+    `Klopt dit niet, of heb je een vraag? Antwoord gewoon op deze mail.`,
+    '',
+    general.signature ?? general.siteName,
+  ]
+    .filter((line) => line !== '')
+    .join('\n');
+
+  const html = shell(
+    general,
+    subject,
+    `<h1 style="margin:0 0 8px;font-size:22px">Je bestelling is geannuleerd</h1>
+     <p style="margin:0 0 16px;color:#4a443c">
+       Bestelnummer <strong>${escapeHtml(order.orderNumber)}</strong> gaat niet door.
+     </p>
+     ${reason ? `<p style="margin:0 0 16px;color:#4a443c">${escapeHtml(reason)}</p>` : ''}
+     ${
+       refunded
+         ? '<p style="margin:0 0 16px;color:#4a443c">Het betaalde bedrag krijg je terug. Afhankelijk van je bank staat dat binnen een paar werkdagen op je rekening.</p>'
+         : ''
+     }
+     <p style="margin:0;color:#6b6257">Klopt dit niet, of heb je een vraag? Antwoord gewoon op deze mail.</p>`,
+  );
+
+  return send({ to: order.customer.email, subject, text, html, general });
+}
+
 export function isMailConfigured(): boolean {
   return smtpConfigured();
 }

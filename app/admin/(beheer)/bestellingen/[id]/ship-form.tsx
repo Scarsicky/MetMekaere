@@ -13,15 +13,23 @@ import {
 import { ActionButton } from '@/components/admin/save-form';
 import { Button } from '@/components/ui/button';
 import { Checkbox, Field, Input } from '@/components/ui/field';
-import { ADMIN_INITIAL_STATE } from '@/lib/admin/action-state';
+import { ADMIN_INITIAL_STATE, type AdminActionState } from '@/lib/admin/action-state';
 import { cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
-function Submit({ label }: { label: string }) {
+function Submit({
+  label,
+  pendingLabel = 'Bezig…',
+  variant = 'primary',
+}: {
+  label: string;
+  pendingLabel?: string;
+  variant?: 'primary' | 'danger';
+}) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? 'Bezig…' : label}
+    <Button type="submit" variant={variant} disabled={pending}>
+      {pending ? pendingLabel : label}
     </Button>
   );
 }
@@ -99,27 +107,104 @@ export function OrderActions({ order }: { order: Order }) {
         ) : null}
 
         {!isClosed ? (
-          <ActionButton
+          <CloseOrderForm
+            orderId={order.id}
             action={cancelOrderAction}
             label="Annuleren"
             pendingLabel="Annuleren…"
-            variant="danger"
+            summary="Bestelling annuleren"
             confirm="Deze bestelling annuleren? Als de voorraad al is afgeboekt, wordt die teruggezet."
-            fields={{ id: order.id }}
+            note="De klant krijgt bericht dat de bestelling niet doorgaat — geen nieuwe bestelbevestiging."
           />
         ) : null}
 
-        {(order.status === 'paid' || order.status === 'shipped') ? (
-          <ActionButton
+        {order.status === 'paid' || order.status === 'shipped' ? (
+          <CloseOrderForm
+            orderId={order.id}
             action={refundOrderAction}
             label="Markeer als terugbetaald"
             pendingLabel="Bijwerken…"
-            variant="danger"
+            summary="Terugbetaling vastleggen"
             confirm="Weet je het zeker? Het geld stort je zelf terug in Mollie; hier wordt alleen de administratie bijgewerkt en de voorraad teruggezet."
-            fields={{ id: order.id }}
+            note="Het bedrag stort je zelf terug in Mollie. Hier leg je alleen vast dát het gebeurt."
           />
         ) : null}
       </div>
     </div>
   );
 }
+
+/**
+ * Een bestelling afsluiten: annuleren of als terugbetaald markeren.
+ *
+ * Ingeklapt, want dit is niet wat je dagelijks doet. Openklappen geeft ruimte
+ * voor een reden die de klant te zien krijgt, en de keuze om helemaal niet te
+ * mailen — bijvoorbeeld bij een testbestelling of een dubbele order.
+ */
+function CloseOrderForm({
+  orderId,
+  action,
+  label,
+  pendingLabel,
+  summary,
+  confirm,
+  note,
+}: {
+  orderId: string;
+  action: (state: AdminActionState, formData: FormData) => Promise<AdminActionState>;
+  label: string;
+  pendingLabel: string;
+  summary: string;
+  confirm: string;
+  note: string;
+}) {
+  const [state, formAction] = useActionState(action, ADMIN_INITIAL_STATE);
+  const router = useRouter();
+  const reasonId = useId();
+
+  useEffect(() => {
+    if (state.status === 'ok') router.refresh();
+  }, [state, router]);
+
+  return (
+    <details className="w-full rounded-xl border border-sand-300 bg-white">
+      <summary className="cursor-pointer list-none px-4 py-3 font-display text-sm font-semibold text-brand-700 marker:hidden">
+        {summary} ▾
+      </summary>
+
+      <form
+        action={formAction}
+        onSubmit={(event) => {
+          if (!window.confirm(confirm)) event.preventDefault();
+        }}
+        className="flex flex-col gap-4 border-t border-sand-200 px-4 py-4"
+      >
+        <input type="hidden" name="id" value={orderId} />
+
+        <p className="text-sm text-sand-600">{note}</p>
+
+        <Field
+          label="Reden voor de klant"
+          htmlFor={reasonId}
+          optional
+          hint="Komt in de mail te staan. Laat leeg als je niets wilt toelichten."
+        >
+          <Input id={reasonId} name="reason" placeholder="Helaas is dit ontwerp uitverkocht." />
+        </Field>
+
+        <Checkbox
+          name="notify"
+          value="ja"
+          defaultChecked
+          label="De klant een mailtje sturen"
+          description="Uitvinken bij een testbestelling of een dubbele order."
+        />
+
+        <div>
+          <Submit label={label} pendingLabel={pendingLabel} variant="danger" />
+        </div>
+      </form>
+    </details>
+  );
+}
+
