@@ -14,6 +14,7 @@ import { ActionButton } from '@/components/admin/save-form';
 import { Button } from '@/components/ui/button';
 import { Checkbox, Field, Input } from '@/components/ui/field';
 import { ADMIN_INITIAL_STATE, type AdminActionState } from '@/lib/admin/action-state';
+import { canSyncWithPayment } from '@/lib/shop/order-rules';
 import { cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
@@ -97,7 +98,14 @@ export function OrderActions({ order }: { order: Order }) {
       ) : null}
 
       <div className="flex flex-wrap gap-2 border-t border-sand-300 pt-5">
-        {order.status === 'pending' ? (
+        {/*
+          Ook bij een mislukte of afgebroken bestelling bruikbaar. Mollie stuurt
+          de klant na zo'n poging terug naar het keuzescherm in plaats van naar
+          ons, zodat hij een andere methode kan proberen — de status komt dan
+          via de webhook binnen. Blijft die om wat voor reden ook uit, dan haal
+          je hem hiermee zelf op.
+        */}
+        {canSyncWithPayment(order) && order.molliePaymentId ? (
           <ActionButton
             action={refreshPaymentAction}
             label="Betaalstatus ophalen"

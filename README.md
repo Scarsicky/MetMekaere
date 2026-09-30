@@ -212,6 +212,27 @@ een bestelling van begin tot eind en controleer:
 - is de voorraad afgeboekt?
 - kwam de bevestigingsmail aan?
 
+#### Wat Mollie doet bij een mislukte betaling
+
+Kies je op de betaalpagina een andere uitkomst dan ‘betaald’, dan blijf je bij
+Mollie en kom je terug op het keuzescherm voor betaalmethodes. Dat is geen fout:
+omdat wij Mollie Checkout gebruiken — de klant kiest zelf hoe hij betaalt —
+geeft Mollie hem de kans het met een andere methode te proberen. Dat gebeurt in
+productie net zo goed als in de testomgeving.
+
+De terugkeerlink is dus niet waar je op moet sturen. Mollie zegt het zelf:
+
+> Best wait until your webhook is called and fetch the status as usual. This is
+> the most reliable way to keep your system in sync with Mollie.
+
+Onze webhook (`/api/mollie/webhook`) doet dat, en haalt de status altijd zelf op
+bij Mollie in plaats van te vertrouwen op wat er binnenkomt. Controleer bij het
+testen dus niet of je teruggestuurd wordt, maar of de bestelling in het beheer
+op de juiste status komt — filter op **Niet doorgegaan**.
+
+Komt die status er niet, dan is de webhook het probleem. Op een bestelling staat
+een knop **Betaalstatus ophalen** waarmee je het met de hand kunt afdwingen.
+
 Klopt alles, vervang de sleutel dan door de live-sleutel:
 
 ```bash

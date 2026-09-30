@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canSyncWithPayment } from '@/lib/shop/payment-flow';
+import { canSyncWithPayment } from '@/lib/shop/order-rules';
 import type { Order } from '@/types';
 
 /**

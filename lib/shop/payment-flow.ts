@@ -4,8 +4,11 @@ import { getGeneralSettings, getShopSettings } from '@/lib/data/settings';
 import { sendOrderConfirmation, sendOrderNotification } from '@/lib/mail';
 import { emptyCartById } from '@/lib/shop/cart';
 import { amountMatches, describeAmountMismatch, fetchPayment } from '@/lib/shop/mollie';
+import { canSyncWithPayment } from '@/lib/shop/order-rules';
 import { getOrder, markOrderPaid, markOrderStatus } from '@/lib/shop/orders';
 import type { Order } from '@/types';
+
+export { canSyncWithPayment };
 
 /**
  * Wat er moet gebeuren als de betaalstatus van een order verandert.
@@ -25,26 +28,6 @@ export type SyncResult =
   | { outcome: 'failed'; order: Order; status: Order['status'] }
   | { outcome: 'mismatch'; order: Order; detail: string }
   | { outcome: 'unknown' };
-
-/**
- * Mag de betaalstatus van deze order nog worden bijgewerkt?
- *
- * Apart en puur, zodat het te testen is zonder Firestore — dit is precies de
- * plek waar een fout duur uitpakt.
- *
- * Twee gevallen liggen vast:
- *  - de order is al betaald of verstuurd: niets meer op te halen;
- *  - de beheerder heeft de order zelf ingetrokken of terugbetaald: dat is een
- *    besluit van een mens en wint van wat Mollie later nog meldt.
- *
- * Een order die bij Mollie strandde ('failed', 'expired', of afgebroken door de
- * klant) mag wél opnieuw gecontroleerd worden: soms komt een betaling alsnog
- * binnen.
- */
-export function canSyncWithPayment(order: Pick<Order, 'status' | 'adminClosed'>): boolean {
-  if (order.adminClosed) return false;
-  return order.status !== 'paid' && order.status !== 'shipped' && order.status !== 'refunded';
-}
 
 export async function syncOrderWithPayment(orderId: string): Promise<SyncResult> {
   const order = await getOrder(orderId);
