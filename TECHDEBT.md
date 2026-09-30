@@ -106,11 +106,17 @@ opslaan van een pagina ooit stilletjes faalt.
 
 ### Geen geautomatiseerde test van het bestelproces
 
-De rekenkern heeft 45 tests (`lib/shop/pricing.test.ts`), maar het pad
+De rekenkern en de losse beslisregels hebben tests (62 stuks), maar het pad
 *winkelwagen → afrekenen → betalen → voorraad afboeken* is met de hand getest,
 niet geautomatiseerd. Bij een verbouwing van de checkout is dat het eerste wat
 je mist.
 
+Dat dit ontbreekt is al een keer duur geweest: het opnieuw versturen van een
+bestelbevestiging na annuleren (september 2026) was met zo’n test meteen
+opgevallen.
+
+*Aanleiding om terug te komen:* voordat je iets wezenlijks aan de checkout of
+aan de orderafhandeling verandert.
 ---
 
 ## Bewuste keuzes

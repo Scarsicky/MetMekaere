@@ -93,6 +93,38 @@ export default async function ThankYouPage({ params }: { params: Promise<{ order
   }
 
   if (result.outcome === 'failed') {
+    /*
+     * Twee heel verschillende gevallen komen hier samen. Is de betaling bij
+     * Mollie gestrand, dan is er niets afgeschreven en kan de klant het gewoon
+     * opnieuw proberen. Heeft de eigenaar de bestelling ingetrokken, dan is er
+     * mogelijk wél betaald — dan is 'er is niets afgeschreven' onjuist en
+     * 'probeer het nog eens' ongepast.
+     */
+    if (order.adminClosed) {
+      return (
+        <Container prose className="py-14 md:py-20 text-center">
+          <h1 className="text-3xl">Deze bestelling is geannuleerd</h1>
+          <p className="mt-4 text-lg text-sand-700">
+            Bestelling <strong className="text-sand-900">{order.orderNumber}</strong> gaat niet door.
+            Je hebt hier bericht over gekregen per mail.
+            {order.status === 'refunded'
+              ? ' Het betaalde bedrag krijg je terug.'
+              : ''}
+          </p>
+          <p className="mt-6 text-sand-700">
+            Klopt dit niet? Mail naar{' '}
+            <a href={`mailto:${general.email}`} className="text-brand-700 underline underline-offset-2">
+              {general.email}
+            </a>{' '}
+            en noem je bestelnummer.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <ButtonLink href="/webshop">Naar de webshop</ButtonLink>
+          </div>
+        </Container>
+      );
+    }
+
     const reason =
       result.status === 'expired'
         ? 'De betaling is verlopen.'
