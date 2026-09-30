@@ -1,0 +1,18 @@
+# De build draait op Linux; regeleindes daarom overal als LF in de repo.
+# Zonder dit levert werken op Windows een diff op waarin elk bestand
+# 'gewijzigd' lijkt, puur door onzichtbare tekens.
+* text=auto eol=lf
+
+# Binaire bestanden nooit aanpassen.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# package-lock.json in diffs samenvouwen; hij is door de machine gemaakt.
+package-lock.json linguist-generated=true -diff

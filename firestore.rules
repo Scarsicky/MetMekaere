@@ -1,0 +1,44 @@
+rules_version = '2';
+
+/*
+ * Firestore-regels voor Met Mekaere.
+ *
+ * Uitgangspunt: de website praat met Firestore via de Admin SDK op de server.
+ * Die gaat langs deze regels heen. Wat hier staat geldt dus alleen voor wat
+ * rechtstreeks vanuit een browser gebeurt — en dat is bewust bijna niets.
+ *
+ * Twee uitzonderingen:
+ *  - de adventskalender wordt live in de browser meegelezen;
+ *  - de bestaande advent-pwa schrijft die kalender vanuit de browser.
+ *
+ * Alles wat met geld, voorraad of persoonsgegevens te maken heeft — producten,
+ * orders, winkelwagens, kortingscodes, nieuwsbriefadressen — is vanuit de
+ * browser volledig dicht. Een bezoeker kan dus geen prijs aanpassen, geen
+ * order vervalsen en geen adressenlijst uitlezen.
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // De adventskalender: iedereen mag lezen, alleen een beheerder mag schrijven.
+    match /activities/{day} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Beheerders kunnen hun eigen rechten-document inzien, niet aanpassen.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Al het overige loopt via de server.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

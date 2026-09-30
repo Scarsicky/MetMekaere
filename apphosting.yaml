@@ -1,0 +1,128 @@
+# Firebase App Hosting.
+#
+# Hier staat hoe de site draait en welke instellingen hij krijgt.
+#
+# Er zijn maar TWEE echte geheimen: de Mollie-sleutel en het mailwachtwoord.
+# Die staan hier niet in maar in Secret Manager. De rest zijn gewone
+# instellingen — ook de Firebase-sleutels, want die staan sowieso in de
+# broncode van elke pagina. Firebase is daar duidelijk over: een web-API-sleutel
+# identificeert het project, hij geeft geen rechten. De beveiliging zit in
+# firestore.rules en storage.rules.
+#
+# Geheimen klaarzetten:
+#   firebase apphosting:secrets:set mollie-api-key
+#   firebase apphosting:secrets:set smtp-password
+#
+# Zie README.md voor de volledige opstartlijst.
+
+runConfig:
+  # Een kleine site met weinig gelijktijdige bezoekers. minInstances 0 betekent:
+  # geen kosten als er niemand is. De eerste bezoeker na een stille periode
+  # wacht daardoor een seconde extra; dat is de afweging waard.
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 4
+  concurrency: 80
+
+env:
+  # ---- Het webadres -------------------------------------------------
+  # Bepaalt canonieke links, de sitemap en hoe de site eruitziet als iemand
+  # hem in WhatsApp deelt. Zet dit op het echte adres zodra het domein staat.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://metmekaere.nl
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # ---- Firebase in de browser ---------------------------------------
+  # Alleen nodig om in te loggen op de admin. Publieke waarden, zie boven.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyA2uYshZW0YL20SPe-r-KuDHhoIT_-xA18
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: metmekaere.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: metmekaere
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: metmekaere.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "301930599461"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:301930599461:web:8c5dc0192c23e554695bcc
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_TELEMETRY_DISABLED
+    value: "1"
+    availability:
+      - BUILD
+
+  # ---- Firebase op de server ----------------------------------------
+  # Firestore en Storage draaien op de service account van App Hosting zelf;
+  # daar is geen sleutelbestand voor nodig.
+  - variable: FIREBASE_PROJECT_ID
+    value: metmekaere
+    availability:
+      - RUNTIME
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: metmekaere.firebasestorage.app
+    availability:
+      - RUNTIME
+
+  # ---- Betalen (Mollie) ---------------------------------------------
+  # Zolang dit geheim ontbreekt, weigert de checkout met een nette melding.
+  # Er kan dus nooit per ongeluk gratis besteld worden.
+  # Begint met test_ zolang je test, met live_ als je opengaat.
+  - variable: MOLLIE_API_KEY
+    secret: mollie-api-key
+    availability:
+      - RUNTIME
+
+  # ---- Bevestigingsmails (Hostnet) ----------------------------------
+  # Poort 587 met STARTTLS. Zie lib/mail.ts: die versleuteling wordt
+  # afgedwongen, niet alleen geprobeerd.
+  - variable: SMTP_HOST
+    value: smtp.hostnet.nl
+    availability:
+      - RUNTIME
+  - variable: SMTP_PORT
+    value: "587"
+    availability:
+      - RUNTIME
+  - variable: SMTP_USER
+    value: info@metmekaere.nl
+    availability:
+      - RUNTIME
+  - variable: SMTP_FROM
+    value: info@metmekaere.nl
+    availability:
+      - RUNTIME
+  - variable: SMTP_PASSWORD
+    secret: smtp-password
+    availability:
+      - RUNTIME
+
+  # ---- Nieuwsbrief ---------------------------------------------------
+  # 'none' = inschrijvingen worden alleen in Firestore bewaard. Je raakt niets
+  # kwijt; zet dit later op 'mailerlite' of 'laposta' met de bijbehorende
+  # sleutel als geheim.
+  - variable: NEWSLETTER_PROVIDER
+    value: none
+    availability:
+      - RUNTIME

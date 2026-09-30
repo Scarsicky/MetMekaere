@@ -1,0 +1,43 @@
+{
+  "name": "metmekaere-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "emulators": "firebase emulators:start --only auth,firestore,storage --project metmekaere",
+    "seed": "tsx --conditions=react-server --env-file=.env.local scripts/seed.ts",
+    "admin:grant": "tsx --conditions=react-server --env-file=.env.local scripts/grant-admin.ts",
+    "mail:test": "tsx --conditions=react-server --env-file=.env.local scripts/mail-test.ts"
+  },
+  "dependencies": {
+    "@mollie/api-client": "^4.6.0",
+    "clsx": "^2.1.1",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^14.4.0",
+    "marked": "^18.0.13",
+    "next": "16.3.5",
+    "nodemailer": "^10.0.9",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.20",
+    "@types/node": "^22.20.2",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.13",
+    "typescript": "^5",
+    "vitest": "^5.0.0"
+  }
+}

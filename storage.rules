@@ -1,0 +1,26 @@
+rules_version = '2';
+
+/*
+ * Storage-regels.
+ *
+ * Alle beelden van de site staan onder `public/`: productfoto's, sfeerbeelden
+ * en het geluid bij de dialectwoorden. Die zijn openbaar leesbaar — ze staan
+ * immers gewoon op de website.
+ *
+ * Uploaden gebeurt via de server (Admin SDK) vanuit de admin, dus vanuit de
+ * browser wordt er nergens geschreven.
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
