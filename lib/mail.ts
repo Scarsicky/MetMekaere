@@ -319,6 +319,62 @@ export async function sendOrderNotification(
   return send({ to, subject, text, html, replyTo: order.customer.email, general });
 }
 
+/**
+ * Waarschuwing aan de eigenaar: er is meer verkocht dan er lag.
+ *
+ * Dit kan gebeuren als twee klanten tegelijk het laatste exemplaar afrekenen.
+ * Beide betalingen zijn geldig — er is echt geld overgemaakt — dus de order
+ * wordt gewoon aangenomen. Alleen weet jij het anders pas bij het inpakken, en
+ * dan sta je met één kaart te weinig en een klant die wacht.
+ *
+ * Deze mail gaat naar de eigenaar, nooit naar de klant: die hoeft niet te
+ * schrikken van iets wat jij misschien dezelfde dag bijdrukt.
+ */
+export async function sendOversoldWarning(
+  order: Order,
+  oversold: { title: string; shortBy: number }[],
+  general: GeneralSettings,
+  to: string,
+): Promise<MailResult> {
+  const subject = `Let op: te weinig voorraad voor ${order.orderNumber}`;
+  const shortage = (item: { title: string; shortBy: number }) =>
+    `${item.title} — ${item.shortBy} te kort`;
+
+  const text = [
+    `Bestelling ${order.orderNumber} is betaald, maar de voorraad was niet toereikend.`,
+    '',
+    ...oversold.map((item) => `- ${shortage(item)}`),
+    '',
+    'De betaling is geldig en de bestelling staat klaar. Je moet zelf bepalen wat',
+    'er gebeurt: bijmaken, later versturen, of de klant bellen.',
+    '',
+    absoluteUrl(`/admin/bestellingen/${order.id}`),
+  ].join('\n');
+
+  const html = shell(
+    general,
+    subject,
+    `<h1 style="margin:0 0 8px;font-size:22px">Te weinig voorraad</h1>
+     <p style="margin:0 0 16px;color:#4a443c">
+       Bestelling <strong>${escapeHtml(order.orderNumber)}</strong> is betaald, maar er lag
+       niet genoeg op voorraad. Vermoedelijk hebben twee klanten vlak na elkaar het
+       laatste exemplaar afgerekend.
+     </p>
+     <ul style="margin:0 0 16px;padding-left:20px;color:#4a443c;line-height:1.6">
+       ${oversold.map((item) => `<li>${escapeHtml(shortage(item))}</li>`).join('')}
+     </ul>
+     <p style="margin:0 0 20px;color:#6b6257">
+       De betaling is geldig en de bestelling staat klaar. Bijmaken, later versturen of
+       de klant bellen — dat is aan jou.
+     </p>
+     <p style="margin:0">
+       <a href="${absoluteUrl(`/admin/bestellingen/${order.id}`)}" style="color:#7f1d1d;font-weight:700">Open de bestelling</a>
+     </p>`,
+  );
+
+  return send({ to, subject, text, html, general });
+}
+
 export async function sendShippingNotice(order: Order, general: GeneralSettings): Promise<MailResult> {
   const subject = `Je bestelling ${order.orderNumber} is onderweg`;
 

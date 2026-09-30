@@ -1,11 +1,11 @@
 import 'server-only';
 
 import { getGeneralSettings, getShopSettings } from '@/lib/data/settings';
-import { sendOrderConfirmation, sendOrderNotification } from '@/lib/mail';
+import { sendOrderConfirmation, sendOrderNotification, sendOversoldWarning } from '@/lib/mail';
 import { emptyCartById } from '@/lib/shop/cart';
 import { amountMatches, describeAmountMismatch, fetchPayment } from '@/lib/shop/mollie';
 import { canSyncWithPayment } from '@/lib/shop/order-rules';
-import { getOrder, markOrderPaid, markOrderStatus } from '@/lib/shop/orders';
+import { getOrder, markOrderPaid, markOrderStatus, type MarkPaidResult } from '@/lib/shop/orders';
 import type { Order } from '@/types';
 
 export { canSyncWithPayment };
@@ -75,6 +75,9 @@ export async function syncOrderWithPayment(orderId: string): Promise<SyncResult>
           `[voorraad] ${order.orderNumber} is betaald terwijl de voorraad ontoereikend was:`,
           result.oversold,
         );
+        // Een logregel is hier niet genoeg: die leest niemand. De eigenaar moet
+        // dit weten voordat hij gaat inpakken.
+        await warnAboutOversold(result.order, result.oversold);
       }
 
       if (result.firstTime) {
@@ -130,5 +133,30 @@ export async function sendOrderMails(order: Order): Promise<void> {
     }
   } catch (error) {
     console.error(`[mail] onverwacht probleem bij ${order.orderNumber}:`, error);
+  }
+}
+
+/**
+ * De eigenaar waarschuwen dat er meer verkocht is dan er lag.
+ *
+ * Net als bij de bestelmails: stukgaan mag dit niet. De betaling is binnen en de
+ * order staat goed in de administratie — dat een waarschuwingsmail niet aankomt,
+ * mag daar niets aan veranderen. Dan blijft de logregel over.
+ */
+async function warnAboutOversold(
+  order: Order,
+  oversold: MarkPaidResult['oversold'],
+): Promise<void> {
+  try {
+    const [general, shop] = await Promise.all([getGeneralSettings(), getShopSettings()]);
+    const to = shop.orderNotificationEmail || general.email;
+    if (!to) return;
+
+    const result = await sendOversoldWarning(order, oversold, general, to);
+    if (!result.sent) {
+      console.warn(`[voorraad] waarschuwing niet verstuurd bij ${order.orderNumber}: ${result.reason}`);
+    }
+  } catch (error) {
+    console.error(`[voorraad] kon de waarschuwing niet versturen bij ${order.orderNumber}:`, error);
   }
 }

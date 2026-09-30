@@ -1,8 +1,7 @@
 import 'server-only';
 
-import { getProductsByIds } from '@/lib/data/catalog';
 import { adminDb, FieldValue } from '@/lib/firebase/admin';
-import { priceCartById, readCartById } from '@/lib/shop/cart';
+import { priceCartById } from '@/lib/shop/cart';
 import type { Address, Order, OrderLine, OrderStatus, PricedCart } from '@/types';
 
 /**
@@ -331,18 +330,10 @@ export async function restockOrder(orderId: string): Promise<void> {
   });
 }
 
-/** Controleert of alles in de wagen nog op voorraad is, vlak voor het betalen. */
-export async function cartStillAvailable(cartId: string): Promise<boolean> {
-  const cart = await readCartById(cartId);
-  if (!cart.lines.length) return false;
-
-  const products = await getProductsByIds(cart.lines.map((l) => l.productId));
-  for (const line of cart.lines) {
-    const product = products.get(line.productId);
-    if (!product || product.status !== 'active') return false;
-    if (product.stock.tracked && !product.stock.allowBackorder && product.stock.quantity < line.qty) {
-      return false;
-    }
-  }
-  return true;
-}
+/*
+ * Hier stond `cartStillAvailable`: een tweede voorraadcontrole vlak voor het
+ * betalen. Die werd nergens aangeroepen en was ook niet nodig — de echte
+ * controle zit in `createPendingOrder`, dat afbreekt op `cart.hasStockIssues`
+ * en de bezoeker terugstuurt naar zijn winkelwagen. Twee plekken die hetzelfde
+ * beweren en waarvan er één nooit draait, is erger dan één plek.
+ */
