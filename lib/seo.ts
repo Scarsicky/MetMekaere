@@ -64,11 +64,19 @@ export function buildMetadata(args: {
   const url = absoluteUrl(args.path);
   const image = args.image ? absoluteUrl(args.image) : absoluteUrl('/logo.png');
 
+  /*
+   * Het weren van zoekmachines hoort hier, niet alleen in de root-layout.
+   * Next laat de metagegevens van een pagina die van de layout overschrijven,
+   * en elke pagina komt hier langs met een eigen `robots`-waarde — ook als die
+   * leeg is. Daarmee verdween de noindex van de layout stilletijd.
+   */
+  const noIndex = args.noIndex === true || isTemporaryDomain();
+
   return {
     title: args.title,
     description: args.description,
     alternates: { canonical: url },
-    robots: args.noIndex ? { index: false, follow: false } : undefined,
+    robots: noIndex ? { index: false, follow: false } : undefined,
     openGraph: {
       type: args.type ?? 'website',
       title: args.title,
