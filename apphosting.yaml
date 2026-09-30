@@ -27,10 +27,18 @@ runConfig:
 
 env:
   # ---- Het webadres -------------------------------------------------
-  # Bepaalt canonieke links, de sitemap en hoe de site eruitziet als iemand
-  # hem in WhatsApp deelt. Zet dit op het echte adres zodra het domein staat.
+  # Dit is het adres waar de site zichzelf aan ophangt: canonieke links, de
+  # sitemap, de terugkeerlink na het betalen, de webhook van Mollie en de
+  # links in bestelmails.
+  #
+  # Staat hier een tijdelijk adres, dan vraagt de site zoekmachines om hem met
+  # rust te laten. Dat schakelt zichzelf uit zodra hier het eigen domein staat.
+  #
+  # ⚠️ BIJ DE OVERSTAP NAAR HET EIGEN DOMEIN: zet dit op https://metmekaere.nl
+  #    en rol opnieuw uit. Vergeet je dat, dan stuurt Mollie klanten na het
+  #    betalen naar het verkeerde adres.
   - variable: NEXT_PUBLIC_SITE_URL
-    value: https://metmekaere.nl
+    value: https://metmekaere-web--metmekaere.europe-west4.hosted.app
     availability:
       - BUILD
       - RUNTIME

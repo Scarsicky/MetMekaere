@@ -3,7 +3,7 @@ import 'server-only';
 import { isMailConfigured } from '@/lib/mail';
 import { isProviderConfigured } from '@/lib/newsletter/providers';
 import { isMollieConfigured, isMollieTestMode } from '@/lib/shop/mollie';
-import { siteUrl } from '@/lib/seo';
+import { isTemporaryDomain, siteUrl } from '@/lib/seo';
 
 /**
  * De opstartlijst voor de admin.
@@ -23,22 +23,9 @@ export interface HealthCheck {
   action?: string;
 }
 
-/**
- * Draait de site op het echte adres, of nog op een test- of voorbeeldadres?
- *
- * Dit onderscheid bepaalt hoe streng we zijn. Een testsleutel op een
- * oefenadres is precies de bedoeling; diezelfde testsleutel op metmekaere.nl
- * betekent dat bezoekers kunnen bestellen zonder te betalen.
- */
-function onPublicDomain(): boolean {
-  return !/localhost|127\.0\.0\.1|\.hosted\.app|\.run\.app|\.web\.app|\.firebaseapp\.com/.test(
-    siteUrl(),
-  );
-}
-
 export function runHealthChecks(): HealthCheck[] {
   const checks: HealthCheck[] = [];
-  const live = onPublicDomain();
+  const live = !isTemporaryDomain();
 
   /* Betalen */
   if (!isMollieConfigured()) {

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Nunito_Sans, Raleway } from 'next/font/google';
 
-import { siteUrl } from '@/lib/seo';
+import { isTemporaryDomain, siteUrl } from '@/lib/seo';
 
 import './globals.css';
 
@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     'Kaarten om te sturen, aandacht voor ons dialect en activiteiten waar je mensen tegenkomt die je anders misschien nooit had gesproken.',
   applicationName: 'Met Mekaere',
   formatDetection: { telephone: false },
+  // Op een tijdelijk adres ook een meta-tag, niet alleen robots.txt: dat laatste
+  // is een verzoek, dit is een instructie die zoekmachines wel opvolgen.
+  robots: isTemporaryDomain() ? { index: false, follow: false } : undefined,
   icons: {
     icon: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

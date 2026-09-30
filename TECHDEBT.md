@@ -28,6 +28,19 @@ firebase apphosting:rollouts:create metmekaere-web -b site
 > want dan kunnen bezoekers bestellen zonder te betalen. Je hoeft dus niet op
 > deze lijst te vertrouwen.
 
+### Webadres omzetten naar het eigen domein
+
+In `apphosting.yaml` staat `NEXT_PUBLIC_SITE_URL` nu op het tijdelijke
+App Hosting-adres. Daar hangt meer aan dan alleen de canonieke links: het is ook
+het adres waar Mollie de klant na het betalen naartoe stuurt, waar de webhook
+binnenkomt, en waar de links in bestelmails heen wijzen.
+
+Zet hem bij de overstap op `https://metmekaere.nl` en rol opnieuw uit.
+
+> Ook dit bewaakt zichzelf: zolang er een tijdelijk adres staat, vraagt de site
+> zoekmachines om hem met rust te laten én meldt het beheerscherm *Opstarten*
+> dat het adres nog niet definitief is.
+
 ### Nieuwsbrief koppelen
 
 `NEWSLETTER_PROVIDER` staat op `none`. Inschrijvingen worden wél bewaard in

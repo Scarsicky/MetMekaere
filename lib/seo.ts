@@ -26,6 +26,27 @@ export function absoluteUrl(path: string): string {
   return `${siteUrl()}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+/**
+ * Draait de site op een tijdelijk adres, of op het eigen domein?
+ *
+ * Tijdelijke adressen zijn de lokale ontwikkelserver en de adressen die
+ * Firebase zelf uitdeelt (`*.hosted.app`, `*.run.app`, `*.web.app`).
+ *
+ * Dit bepaalt twee dingen. Zoekmachines wordt gevraagd een tijdelijk adres met
+ * rust te laten — anders staat straks het oefenadres in Google naast het echte
+ * en concurreren die twee met elkaar. En het beheer weet zo of een
+ * Mollie-testsleutel onschuldig is (op een oefenadres) of juist een lek
+ * (op het eigen domein).
+ *
+ * Het schakelt zichzelf om: zodra `NEXT_PUBLIC_SITE_URL` op het echte domein
+ * staat, gaat indexeren vanzelf aan.
+ */
+export function isTemporaryDomain(): boolean {
+  return /localhost|127\.0\.0\.1|\.hosted\.app|\.run\.app|\.web\.app|\.firebaseapp\.com/.test(
+    siteUrl(),
+  );
+}
+
 /** Meta-omschrijving: één alinea, niet afgekapt midden in een woord. */
 export function metaDescription(input: string, max = 160): string {
   return truncate(markdownToPlainText(input), max);
