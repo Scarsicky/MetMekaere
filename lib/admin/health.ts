@@ -23,8 +23,22 @@ export interface HealthCheck {
   action?: string;
 }
 
+/**
+ * Draait de site op het echte adres, of nog op een test- of voorbeeldadres?
+ *
+ * Dit onderscheid bepaalt hoe streng we zijn. Een testsleutel op een
+ * oefenadres is precies de bedoeling; diezelfde testsleutel op metmekaere.nl
+ * betekent dat bezoekers kunnen bestellen zonder te betalen.
+ */
+function onPublicDomain(): boolean {
+  return !/localhost|127\.0\.0\.1|\.hosted\.app|\.run\.app|\.web\.app|\.firebaseapp\.com/.test(
+    siteUrl(),
+  );
+}
+
 export function runHealthChecks(): HealthCheck[] {
   const checks: HealthCheck[] = [];
+  const live = onPublicDomain();
 
   /* Betalen */
   if (!isMollieConfigured()) {
@@ -40,9 +54,14 @@ export function runHealthChecks(): HealthCheck[] {
     checks.push({
       id: 'mollie',
       label: 'Betalen met iDEAL',
-      status: 'warn',
-      detail: 'Mollie staat in testmodus. Bestellingen worden niet echt afgerekend.',
-      action: 'Vervang de test-sleutel door de live-sleutel zodra je opengaat.',
+      // Op het echte adres is dit geen aandachtspuntje maar een lek.
+      status: live ? 'todo' : 'warn',
+      detail: live
+        ? 'De shop staat op het echte adres, maar Mollie draait nog in testmodus. Bezoekers kunnen nu bestellen zonder dat er geld wordt afgeschreven.'
+        : 'Mollie staat in testmodus. Bestellingen worden niet echt afgerekend — precies goed om mee te oefenen.',
+      action: live
+        ? 'Vervang de sleutel nú: firebase apphosting:secrets:set mollie-api-key — en rol daarna opnieuw uit.'
+        : 'Vervang de test-sleutel door de live-sleutel zodra je opengaat.',
     });
   } else {
     checks.push({
@@ -95,19 +114,17 @@ export function runHealthChecks(): HealthCheck[] {
   /* Adres van de site */
   const url = siteUrl();
   checks.push(
-    url.includes('localhost')
-      ? {
-          id: 'url',
-          label: 'Webadres',
-          status: 'warn',
-          detail: `De site denkt dat hij op ${url} draait.`,
-          action: 'Zet NEXT_PUBLIC_SITE_URL op het echte adres zodra de site live staat.',
-        }
+    live
+      ? { id: 'url', label: 'Webadres', status: 'ok', detail: url }
       : {
           id: 'url',
           label: 'Webadres',
-          status: 'ok',
-          detail: url,
+          status: 'warn',
+          detail: url.includes('localhost')
+            ? `De site denkt dat hij op ${url} draait.`
+            : `De site staat op een tijdelijk adres (${url}), nog niet op het eigen domein.`,
+          action:
+            'Zet NEXT_PUBLIC_SITE_URL in apphosting.yaml op het echte adres zodra het domein staat — anders wijzen de sitemap en de deellinks naar het verkeerde adres.',
         },
   );
 

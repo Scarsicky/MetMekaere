@@ -226,6 +226,9 @@ staan of later weghalen — beide werken.
 
 ## Nog na te lopen voordat de shop opengaat
 
+De volledige lijst — inclusief techniek-schuld en bewuste keuzes met hun
+aanleiding om terug te komen — staat in [TECHDEBT.md](TECHDEBT.md).
+
 - **Algemene voorwaarden en privacyverklaring** staan er als werkbare opzet in,
   maar zijn geen juridisch advies. Lees ze na en vul de bedrijfsgegevens aan.
 - **De voorbeeldproducten en -activiteiten** uit de seed zijn bedoeld om te laten
