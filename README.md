@@ -184,6 +184,16 @@ firebase apphosting:secrets:grantaccess smtp-password --backend metmekaere-web
 De service account van de backend heeft ook rechten nodig op Firestore en
 Storage: `roles/datastore.user` en `roles/storage.objectAdmin` op het project.
 
+> **Een mislukte uitrol is stil.** Weigert App Hosting een uitrol, dan blijft
+> de vorige versie gewoon draaien. De site geeft dan netjes een 200 en ziet er
+> in orde uit, terwijl je wijziging nergens is. Dat `curl` een 200 teruggeeft
+> bewijst dus niets; controleer of de *nieuwe* versie draait. Het snelst gaat
+> dat via *Beheer → Opstarten*, dat benoemt wat de draaiende site werkelijk aan
+> instellingen heeft.
+>
+> Een veelvoorkomende oorzaak is een geheim waar de backend niet bij mag — zie
+> de uitleg bovenin `apphosting.yaml`.
+
 ### 4. Inrichten via de admin
 
 Na de eerste uitrol krijg je een adres als

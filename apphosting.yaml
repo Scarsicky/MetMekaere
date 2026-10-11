@@ -15,6 +15,13 @@
 #   firebase apphosting:secrets:set smtp-password
 #   firebase apphosting:secrets:set laposta-api-key
 #
+# Een geheim aanmaken is niet genoeg: de backend moet er ook bij mógen. Dat
+# gaat meestal vanzelf, maar niet altijd — bij de Laposta-sleutel ging het mis.
+# De uitrol wordt dan geweigerd met 'Misconfigured secret', en dat is stil: de
+# vorige versie blijft gewoon draaien, dus de site lijkt in orde terwijl je
+# wijziging nergens is. Herstellen:
+#   firebase apphosting:secrets:grantaccess <naam> --backend metmekaere-web
+#
 # Zie README.md voor de volledige opstartlijst.
 
 runConfig:
@@ -151,11 +158,9 @@ env:
   # Die laten we met opzet leeg: het inschrijfformulier vraagt alleen om een
   # adres, dus er valt meestal niets te vullen.
   #
-  # Ze staan hier daarom NIET als variabele met een lege waarde. App Hosting
-  # weigerde de hele uitrol daarop, en een geweigerde uitrol is stil: de vorige
-  # versie blijft draaien en alles lijkt gewoon te werken. De code gaat bij een
-  # ontbrekende variabele vanzelf uit van 'geen naam', dus weglaten doet
-  # precies hetzelfde.
+  # Ze staan hier niet als variabele met een lege waarde, maar zijn gewoon
+  # weggelaten: de code gaat bij een ontbrekende variabele vanzelf uit van
+  # 'geen naam', dus dat komt op hetzelfde neer en leest duidelijker.
   #
   # Wil je de naam die bij het afrekenen toch al is opgegeven wél doorgeven,
   # voeg ze dan hier toe met de waarden voornaam en achternaam:
