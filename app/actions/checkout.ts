@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getGeneralSettings, getShopSettings } from '@/lib/data/settings';
 import { subscribeToNewsletter } from '@/lib/newsletter';
-import { limitByIp } from '@/lib/rate-limit';
+import { clientIp, limitByIp } from '@/lib/rate-limit';
 import { readCartId, setShippingChoice } from '@/lib/shop/cart';
 import { checkoutFromFormData, checkoutSchema, flattenIssues } from '@/lib/shop/checkout-schema';
 import { isMollieConfigured, startPayment, useSimulatedPayments } from '@/lib/shop/mollie';
@@ -101,10 +101,14 @@ export async function checkoutAction(
 
   // De nieuwsbrief mag het afrekenen nooit ophouden.
   if (input.newsletterOptIn) {
+    // Het IP-adres nú ophalen: dit loopt door nadat het antwoord weg is, en
+    // dan zijn de headers van het verzoek niet meer te lezen.
+    const ip = await clientIp();
     void subscribeToNewsletter({
       email: input.email,
       name: input.shipping.name,
       source: 'checkout',
+      ip,
     }).catch((error) => console.error('[checkout] nieuwsbriefinschrijving mislukte:', error));
   }
 

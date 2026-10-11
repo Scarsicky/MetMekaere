@@ -23,6 +23,13 @@ export async function subscribeToNewsletter(args: {
   email: string;
   name?: string;
   source: string;
+  /**
+   * Het IP-adres van de inschrijver. Laposta eist het. Het wordt bewust
+   * meegegeven en hier niet zelf opgehaald: bij het afrekenen loopt deze
+   * functie door nadat het antwoord al verstuurd is, en dan zijn de headers
+   * van het verzoek niet meer te lezen.
+   */
+  ip?: string;
 }): Promise<SubscribeResult> {
   const email = args.email.trim().toLowerCase();
 
@@ -57,7 +64,7 @@ export async function subscribeToNewsletter(args: {
   }
 
   // De mailinglijst is stap twee. Een storing daar mag de bezoeker niet raken.
-  const result = await sendToProvider({ email, name, source: args.source });
+  const result = await sendToProvider({ email, name, source: args.source, ip: args.ip });
 
   try {
     if (result.status === 'ok') {

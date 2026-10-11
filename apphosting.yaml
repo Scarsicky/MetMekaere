@@ -2,7 +2,8 @@
 #
 # Hier staat hoe de site draait en welke instellingen hij krijgt.
 #
-# Er zijn maar TWEE echte geheimen: de Mollie-sleutel en het mailwachtwoord.
+# Er zijn maar DRIE echte geheimen: de Mollie-sleutel, het mailwachtwoord en
+# de Laposta-sleutel.
 # Die staan hier niet in maar in Secret Manager. De rest zijn gewone
 # instellingen — ook de Firebase-sleutels, want die staan sowieso in de
 # broncode van elke pagina. Firebase is daar duidelijk over: een web-API-sleutel
@@ -12,6 +13,7 @@
 # Geheimen klaarzetten:
 #   firebase apphosting:secrets:set mollie-api-key
 #   firebase apphosting:secrets:set smtp-password
+#   firebase apphosting:secrets:set laposta-api-key
 #
 # Zie README.md voor de volledige opstartlijst.
 
@@ -126,11 +128,39 @@ env:
     availability:
       - RUNTIME
 
-  # ---- Nieuwsbrief ---------------------------------------------------
-  # 'none' = inschrijvingen worden alleen in Firestore bewaard. Je raakt niets
-  # kwijt; zet dit later op 'mailerlite' of 'laposta' met de bijbehorende
-  # sleutel als geheim.
+  # ---- Nieuwsbrief (Laposta) -----------------------------------------
+  # Inschrijvingen worden altijd éérst in Firestore bewaard. Gaat er bij
+  # Laposta iets mis, dan blijft het adres dus staan — met de foutmelding
+  # erbij, zichtbaar bij Beheer → Nieuwsbrief.
+  #
+  # AANZETTEN IN DRIE STAPPEN:
+  #   1. firebase apphosting:secrets:set laposta-api-key
+  #      (plak de sleutel in die prompt)
+  #   2. vul LAPOSTA_LIST_ID hieronder met het id van je lijst
+  #   3. zet NEWSLETTER_PROVIDER op 'laposta' en rol opnieuw uit
+  #
+  # Zolang stap 2 en 3 niet gedaan zijn, blijft alles werken zoals nu.
   - variable: NEWSLETTER_PROVIDER
     value: none
+    availability:
+      - RUNTIME
+
+  # Het id van de lijst waar inschrijvingen in moeten. Te vinden in Laposta
+  # bij de lijst zelf. Geen geheim: zonder de sleutel kun je er niets mee.
+  - variable: LAPOSTA_LIST_ID
+    value: ""
+    availability:
+      - RUNTIME
+
+  # De naam van het veld in die lijst waar de naam in hoort — bij Laposta heet
+  # dat de 'relatievariabele'. Bestaat het veld niet, dan schrijft de site de
+  # inschrijving alsnog in, alleen zonder naam.
+  - variable: LAPOSTA_NAME_FIELD
+    value: name
+    availability:
+      - RUNTIME
+
+  - variable: LAPOSTA_API_KEY
+    secret: laposta-api-key
     availability:
       - RUNTIME

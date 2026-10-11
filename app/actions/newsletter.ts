@@ -1,7 +1,7 @@
 'use server';
 
 import { subscribeToNewsletter } from '@/lib/newsletter';
-import { limitByIp } from '@/lib/rate-limit';
+import { clientIp, limitByIp } from '@/lib/rate-limit';
 import type { NewsletterFormState } from '@/lib/shop/action-state';
 
 export async function subscribeAction(
@@ -25,7 +25,7 @@ export async function subscribeAction(
   const name = String(formData.get('name') ?? '');
   const source = String(formData.get('source') ?? 'website').slice(0, 40);
 
-  const result = await subscribeToNewsletter({ email, name, source });
+  const result = await subscribeToNewsletter({ email, name, source, ip: await clientIp() });
 
   if (!result.ok) {
     return { status: 'error', message: result.error };

@@ -16,6 +16,12 @@ export interface SubscribeInput {
   email: string;
   name?: string;
   source: string;
+  /**
+   * Het IP-adres van de inschrijver. Laposta eist dit veld; zonder wordt elke
+   * inschrijving geweigerd. Wordt doorgegeven vanaf de plek waar het verzoek
+   * binnenkomt, want daar zijn de headers nog beschikbaar.
+   */
+  ip?: string;
 }
 
 export type ProviderResult =
@@ -89,6 +95,22 @@ async function subscribeMailerLite(input: SubscribeInput): Promise<ProviderResul
  * Laposta
  * ------------------------------------------------------------------ */
 
+/**
+ * De naam van het veld in de Laposta-lijst waar de naam in hoort.
+ *
+ * Laposta-lijsten hebben alleen `email` vast; al het andere is een veld dat je
+ * zelf aanmaakt, met een naam die jij kiest. De sleutel die de API verwacht is
+ * de 'relatievariabele' van dat veld. Staat hier een naam die in de lijst niet
+ * bestaat, dan weigert Laposta het verzoek — daarom wordt het dan zonder naam
+ * opnieuw geprobeerd (zie hieronder). Leeg laten betekent: alleen het adres.
+ */
+const LAPOSTA_NAME_FIELD = process.env.LAPOSTA_NAME_FIELD ?? 'name';
+
+interface LapostaResponse {
+  member?: { member_id?: string };
+  error?: { message?: string; code?: number };
+}
+
 async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> {
   const apiKey = process.env.LAPOSTA_API_KEY;
   const listId = process.env.LAPOSTA_LIST_ID;
@@ -96,27 +118,60 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
     return { status: 'error', message: 'LAPOSTA_API_KEY of LAPOSTA_LIST_ID ontbreekt.' };
   }
 
-  const { first, last } = splitName(input.name);
-  const body = new URLSearchParams({ list_id: listId, email: input.email });
-  if (first) body.set('custom_fields[voornaam]', first);
-  if (last) body.set('custom_fields[achternaam]', last);
+  const authorization = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
 
-  try {
+  function body(withName: boolean): URLSearchParams {
+    const form = new URLSearchParams({
+      list_id: listId!,
+      email: input.email,
+      /*
+       * Verplicht bij Laposta. Hebben we geen adres — lokaal draaien,
+       * bijvoorbeeld — dan sturen we een leeg adres mee in plaats van niets,
+       * want een ontbrekend veld laat het hele verzoek stuklopen.
+       */
+      ip: input.ip && input.ip !== 'onbekend' ? input.ip : '0.0.0.0',
+    });
+    if (withName && input.name && LAPOSTA_NAME_FIELD) {
+      form.set(`custom_fields[${LAPOSTA_NAME_FIELD}]`, input.name);
+    }
+    return form;
+  }
+
+  async function send(withName: boolean): Promise<{ res: Response; data: LapostaResponse }> {
     const res = await postJson('https://api.laposta.nl/v2/member', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        // Laposta gebruikt basic auth met de sleutel als gebruikersnaam.
-        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
+        // Laposta gebruikt basic auth met de sleutel als gebruikersnaam en
+        // een leeg wachtwoord.
+        Authorization: authorization,
       },
-      body,
+      body: body(withName),
     });
+    const data = (await res.json().catch(() => ({}))) as LapostaResponse;
+    return { res, data };
+  }
 
-    const data = (await res.json()) as { member?: { member_id?: string }; error?: { message?: string } };
+  try {
+    let { res, data } = await send(Boolean(input.name));
+
+    /*
+     * Mislukt het en stuurden we een naam mee, dan is een onbekende veldnaam
+     * de waarschijnlijkste oorzaak. Het adres is belangrijker dan de naam, dus
+     * dan liever één keer opnieuw zonder.
+     */
+    if (!res.ok && input.name) {
+      console.warn(
+        `[newsletter] Laposta weigerde de inschrijving mét naam (${data.error?.message ?? res.status}); ` +
+          `opnieuw geprobeerd zonder. Klopt LAPOSTA_NAME_FIELD met een veld in de lijst?`,
+      );
+      ({ res, data } = await send(false));
+    }
 
     // Al ingeschreven is geen fout: het doel is bereikt.
-    if (!res.ok && !/bestaat al|already exists/i.test(data.error?.message ?? '')) {
-      return { status: 'error', message: `Laposta gaf ${res.status}: ${data.error?.message ?? ''}` };
+    const message = data.error?.message ?? '';
+    if (!res.ok && !/bestaat al|already exists|komt al voor/i.test(message)) {
+      return { status: 'error', message: `Laposta gaf ${res.status}: ${message}` };
     }
     return { status: 'ok', providerId: data.member?.member_id ?? null };
   } catch (error) {
