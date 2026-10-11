@@ -6,6 +6,20 @@ const nextConfig: NextConfig = {
    * van Cache Components. Reden: voorspelbaar gedrag en minder bouwrestricties
    * voor een site met winkelwagen-cookies. Zie lib/data/cache.ts.
    */
+  /**
+   * Hoe lang een verouderde pagina nog hergebruikt mag worden.
+   *
+   * Zonder deze instelling zet Next er een jaar in: de `Cache-Control` wordt
+   * dan `s-maxage=300, stale-while-revalidate=31535700`. Dat laatste geldt niet
+   * alleen voor het CDN maar ook voor de browser van de bezoeker, en daardoor
+   * kreeg wie al eens langs was geweest maandenlang de oude pagina te zien —
+   * tot hij zijn browsegegevens wiste.
+   *
+   * Gelijk aan de verversingstijd in `lib/data/cache.ts`, zodat er geen
+   * hergebruik van verouderde pagina's overblijft.
+   */
+  expireTime: 60,
+
   images: {
     remotePatterns: [
       // Afbeeldingen uit Cloud Storage (productfoto's, CMS-beelden).

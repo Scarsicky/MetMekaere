@@ -28,14 +28,25 @@ export const TAGS = {
   activities: 'activities',
 } as const;
 
-/** Hoe lang iets mag blijven staan als niemand het actief ververst. */
+/**
+ * Hoe lang iets mag blijven staan als niemand het actief ververst.
+ *
+ * Deze getallen bepalen méér dan alleen onze eigen cache: Next leidt er de
+ * `s-maxage` van de pagina uit af, en dat is precies zo lang als het CDN van
+ * App Hosting zijn kopie blijft uitserveren. Een `revalidateTag` na een
+ * wijziging in het beheer leegt onze cache meteen, maar níet die van het CDN —
+ * dat is gedocumenteerd gedrag. De tijd hieronder is dus de maximale tijd
+ * tussen 'opgeslagen in het beheer' en 'zichtbaar voor een bezoeker'.
+ *
+ * Daarom staan ze kort. Een minuut wachten is te doen; een uur niet.
+ */
 export const TTL = {
-  /** Redactionele inhoud: rustig, wordt bij wijziging toch actief ververst. */
-  content: 60 * 60,
-  /** Catalogus: korter, want voorraad schuift mee. */
-  catalog: 60 * 5,
-  /** Instellingen: zelden gewijzigd. */
-  settings: 60 * 60,
+  /** Redactionele inhoud. */
+  content: 60,
+  /** Catalogus: prijzen en voorraad. */
+  catalog: 60,
+  /** Instellingen: sturen onder meer de header, de footer en 'shop gesloten'. */
+  settings: 60,
 } as const;
 
 /**

@@ -2,13 +2,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { NewsletterForm } from '@/components/newsletter-form';
+import { getPageIndex } from '@/lib/data/content';
 import { getAdventSettings, getGeneralSettings, isAdventInSeason } from '@/lib/data/settings';
-import { ADVENT_NAV, FOOTER_LINKS, MAIN_NAV } from '@/lib/navigation';
+import { ADVENT_NAV, FOOTER_LINKS, MAIN_NAV, visibleNav } from '@/lib/navigation';
 
 export async function Footer() {
-  const [general, advent] = await Promise.all([getGeneralSettings(), getAdventSettings()]);
+  const [general, advent, pageIndex] = await Promise.all([
+    getGeneralSettings(),
+    getAdventSettings(),
+    getPageIndex(),
+  ]);
   const year = new Date().getFullYear();
-  const navItems = isAdventInSeason(advent) ? [...MAIN_NAV.slice(1), ADVENT_NAV] : MAIN_NAV.slice(1);
+
+  // `slice(1)` laat de homepagina weg: die staat al onder het logo.
+  const main = visibleNav(MAIN_NAV.slice(1), pageIndex);
+  const navItems = isAdventInSeason(advent) ? [...main, ADVENT_NAV] : main;
+  const footerLinks = visibleNav(FOOTER_LINKS, pageIndex);
 
   return (
     <footer className="mt-auto border-t border-sand-300 bg-white">
@@ -94,7 +103,7 @@ export async function Footer() {
                 Praktisch
               </h2>
               <ul className="mt-4 flex flex-col gap-2.5">
-                {FOOTER_LINKS.map((item) => (
+                {footerLinks.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className="text-sand-700 transition-colors hover:text-brand-700">
                       {item.label}

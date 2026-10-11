@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
 
 import { getActiveProducts, getCategories } from '@/lib/data/catalog';
-import { getHappenings } from '@/lib/data/content';
+import { getHappenings, getPageIndex } from '@/lib/data/content';
 import { getAdventSettings, isAdventInSeason } from '@/lib/data/settings';
+import { isNavVisible } from '@/lib/navigation';
 import { absoluteUrl } from '@/lib/seo';
 
 /**
@@ -13,27 +14,42 @@ import { absoluteUrl } from '@/lib/seo';
  * en hebben in zoekresultaten niets te zoeken.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories, happenings, advent] = await Promise.all([
+  const [products, categories, happenings, advent, pageIndex] = await Promise.all([
     getActiveProducts(),
     getCategories(),
     getHappenings(),
     getAdventSettings(),
+    getPageIndex(),
   ]);
 
   const now = new Date();
 
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: absoluteUrl('/webshop'), lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-    { url: absoluteUrl('/fluffy-dialect'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: absoluteUrl('/community'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: absoluteUrl('/doen-en-beleven'), lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
-    { url: absoluteUrl('/over'), lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: absoluteUrl('/contact'), lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
-    { url: absoluteUrl('/verzenden-en-retour'), lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-    { url: absoluteUrl('/algemene-voorwaarden'), lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-    { url: absoluteUrl('/privacy'), lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-  ];
+  /*
+   * Pagina's die op concept staan horen hier niet in: Google zou ze oppikken
+   * en de bezoeker landt dan op een 404. Dezelfde regel als in het menu, zodat
+   * er maar één plek is die bepaalt of een pagina publiek is.
+   */
+  const staticPages: MetadataRoute.Sitemap = (
+    [
+      { path: '/', changeFrequency: 'weekly', priority: 1 },
+      { path: '/webshop', changeFrequency: 'weekly', priority: 0.9 },
+      { path: '/fluffy-dialect', changeFrequency: 'monthly', priority: 0.7 },
+      { path: '/community', changeFrequency: 'monthly', priority: 0.7 },
+      { path: '/doen-en-beleven', changeFrequency: 'weekly', priority: 0.7 },
+      { path: '/over', changeFrequency: 'monthly', priority: 0.6 },
+      { path: '/contact', changeFrequency: 'yearly', priority: 0.4 },
+      { path: '/verzenden-en-retour', changeFrequency: 'yearly', priority: 0.3 },
+      { path: '/algemene-voorwaarden', changeFrequency: 'yearly', priority: 0.2 },
+      { path: '/privacy', changeFrequency: 'yearly', priority: 0.2 },
+    ] as const
+  )
+    .filter((entry) => isNavVisible(entry.path, pageIndex))
+    .map((entry) => ({
+      url: absoluteUrl(entry.path),
+      lastModified: now,
+      changeFrequency: entry.changeFrequency,
+      priority: entry.priority,
+    }));
 
   if (isAdventInSeason(advent)) {
     staticPages.push({

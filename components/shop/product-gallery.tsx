@@ -3,19 +3,37 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { ASPECT_CLASS } from '@/lib/shop/image-orientation';
 import { cn } from '@/lib/utils';
-import type { StoredImage } from '@/types';
+import type { ImageOrientation, StoredImage } from '@/types';
 
 /**
  * De foto's bij een product. Eén grote afbeelding met miniaturen eronder.
  * Bij één foto verdwijnen de miniaturen vanzelf.
+ *
+ * Hier krijgt de foto wél de verhouding van het product zelf: er staat er maar
+ * één, dus een liggende kaart mag gewoon liggend en op volle breedte.
  */
-export function ProductGallery({ images, title }: { images: StoredImage[]; title: string }) {
+export function ProductGallery({
+  images,
+  title,
+  orientation = 'portrait',
+}: {
+  images: StoredImage[];
+  title: string;
+  orientation?: ImageOrientation;
+}) {
   const [active, setActive] = useState(0);
+  const aspect = ASPECT_CLASS[orientation];
 
   if (!images.length) {
     return (
-      <div className="flex aspect-[4/5] items-center justify-center rounded-[1.5rem] border border-sand-300 bg-sand-200">
+      <div
+        className={cn(
+          'flex items-center justify-center rounded-[1.5rem] border border-sand-300 bg-sand-200',
+          aspect,
+        )}
+      >
         <Image src="/logo.png" alt="" width={512} height={512} className="size-40 opacity-25" />
       </div>
     );
@@ -25,7 +43,12 @@ export function ProductGallery({ images, title }: { images: StoredImage[]; title
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-sand-300 bg-white shadow-soft">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-[1.5rem] border border-sand-300 bg-white shadow-soft',
+          aspect,
+        )}
+      >
         <Image
           key={current.url}
           src={current.url}

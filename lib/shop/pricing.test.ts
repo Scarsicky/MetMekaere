@@ -18,6 +18,7 @@ function product(over: Partial<Product> & { id: string }): Product {
     priceCents: 350,
     vatRate: 0.21,
     images: [],
+    imageOrientation: 'portrait',
     stock: { tracked: false, quantity: 0, allowBackorder: false, lowStockThreshold: 3 },
     weightGrams: 20,
     shippingClass: 'letterbox',

@@ -116,7 +116,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </nav>
 
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          <ProductGallery images={product.images} title={product.title} />
+          <ProductGallery
+            images={product.images}
+            title={product.title}
+            orientation={product.imageOrientation}
+          />
 
           <div className="flex flex-col">
             <div className="flex flex-wrap gap-2">

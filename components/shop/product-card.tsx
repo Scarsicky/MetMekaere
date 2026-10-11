@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { isPurchasable } from '@/lib/data/catalog';
 import { formatCents } from '@/lib/money';
+import { GRID_TILE_ASPECT, gridImageFit } from '@/lib/shop/image-orientation';
 import { tierPreviewForProduct } from '@/lib/shop/pricing';
 import { cn } from '@/lib/utils';
 import type { Product, TierRule } from '@/types';
@@ -35,7 +36,12 @@ export function ProductCard({
 
   return (
     <article className={cn('group relative flex flex-col', className)}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-sand-300 bg-white shadow-soft">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-2xl border border-sand-300 bg-white shadow-soft',
+          GRID_TILE_ASPECT,
+        )}
+      >
         {image ? (
           <Image
             src={image.url}
@@ -44,7 +50,8 @@ export function ProductCard({
             sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 90vw"
             priority={priority}
             className={cn(
-              'object-cover transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-[1.03]',
+              'transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-[1.03]',
+              gridImageFit(product.imageOrientation),
               !available && 'opacity-60 grayscale-[0.4]',
             )}
           />

@@ -20,6 +20,9 @@ export interface Seo {
   noIndex?: boolean;
 }
 
+/** Hoe een productfoto getoond wordt: staand (4:5) of liggend (5:4). */
+export type ImageOrientation = 'portrait' | 'landscape';
+
 export interface StoredImage {
   /** Pad in Cloud Storage, bv. `products/kaart-mekaere/voorkant.jpg`. */
   path: string;
@@ -82,6 +85,11 @@ export interface Product {
   /** 0.21 | 0.09 | 0 */
   vatRate: number;
   images: StoredImage[];
+  /**
+   * Staand of liggend. Bepaalt de verhouding waarin de foto's van dit product
+   * worden getoond: kaarten zijn meestal staand, maar niet allemaal.
+   */
+  imageOrientation: ImageOrientation;
   stock: ProductStock;
   weightGrams: number;
   shippingClass: ShippingClass;

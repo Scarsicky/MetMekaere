@@ -183,6 +183,9 @@ export function normalizeProduct(id: string, raw: Raw): Product {
     compareAtPriceCents: compareAt !== null && compareAt > priceCents ? compareAt : null,
     vatRate: num(raw.vatRate, 0.21),
     images: normalizeImages(raw.images),
+    // Staand is de norm bij kaarten; alles wat niet uitdrukkelijk liggend is,
+    // blijft staand. Zo verandert er niets aan bestaande producten.
+    imageOrientation: raw.imageOrientation === 'landscape' ? 'landscape' : 'portrait',
     stock: {
       tracked: bool(stock.tracked, false),
       quantity: Math.round(num(stock.quantity, 0)),

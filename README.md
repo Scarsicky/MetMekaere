@@ -94,10 +94,30 @@ kostprijs.
 
 Firestore-lezingen worden gecached met labels (`lib/data/cache.ts`). Sla je iets
 op in de admin, dan wordt precies het betrokken label ververst — zie
-`lib/admin/revalidate.ts`. Je ziet je wijziging dus meteen terug.
+`lib/admin/revalidate.ts`.
+
+**Maar dat is niet de hele keten.** Er liggen drie caches achter elkaar, en
+`revalidateTag` raakt alleen de eerste:
+
+| Waar | Wat het bewaart | Hoe lang |
+| --- | --- | --- |
+| Onze eigen cache | het Firestore-antwoord | tot `revalidateTag`, anders 60 s |
+| Het CDN van App Hosting | de hele pagina | `s-maxage`, nu 60 s |
+| De browser van de bezoeker | de hele pagina | zolang `stale-while-revalidate` toestaat |
+
+Dat een wijziging niet meteen zichtbaar was, kwam door de onderste twee. Next
+zet standaard `stale-while-revalidate` op een jáár, en dat geldt ook voor de
+browser van de bezoeker: wie al eens langs was geweest, bleef de oude pagina
+zien tot hij zijn browsegegevens wiste. Daarom staat `expireTime` nu in
+`next.config.ts`, en staan de bewaartijden in `lib/data/cache.ts` op een minuut.
+
+Een CDN-kopie laat zich niet vanuit de code wegwerpen — dat is
+[gedocumenteerd gedrag van Next](https://nextjs.org/docs/app/guides/cdn-caching).
+**Reken dus op maximaal een minuut** tussen opslaan en zichtbaar zijn. Het
+beheer zelf laat alles wel direct zien: die pagina's worden nergens gecached.
 
 Let op bij lokaal ontwikkelen: verander je data buiten de admin om (met een
-script of rechtstreeks in de emulator), dan blijft de oude versie tot een uur
+script of rechtstreeks in de emulator), dan blijft de oude versie een minuut
 staan. `rm -rf .next` lost dat op.
 
 ### De adventskalender

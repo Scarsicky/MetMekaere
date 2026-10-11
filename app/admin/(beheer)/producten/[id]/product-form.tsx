@@ -144,6 +144,23 @@ export function ProductForm({
           initial={product?.images ?? []}
           hint="De eerste foto is de foto die overal in de lijsten wordt getoond. Sleep hem naar voren met de pijltjes."
         />
+
+        <div className="mt-4 max-w-xs">
+          <Field
+            label="Vorm van de foto’s"
+            htmlFor="imageOrientation"
+            hint="Staand voor een gewone kaart, liggend voor een breed ontwerp. Op de productpagina krijgt de foto deze vorm; in het overzicht blijft elke tegel staand, zodat het raster rustig blijft — een liggende foto wordt daar passend getoond in plaats van bijgesneden."
+          >
+            <Select
+              id="imageOrientation"
+              name="imageOrientation"
+              defaultValue={product?.imageOrientation ?? 'portrait'}
+            >
+              <option value="portrait">Staand</option>
+              <option value="landscape">Liggend</option>
+            </Select>
+          </Field>
+        </div>
       </AdminCard>
 
       {/* Prijs */}

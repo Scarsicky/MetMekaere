@@ -47,6 +47,35 @@ export const getPage = cached(
   { tags: [TAGS.pages], revalidate: TTL.content },
 );
 
+/**
+ * Welke CMS-pagina's bestaan er, en staan ze op gepubliceerd?
+ *
+ * Eén lezing van de hele collectie, gecached onder hetzelfde label als de
+ * pagina's zelf. Het menu, de footer en de sitemap gebruiken dit om een pagina
+ * die op concept staat nergens meer aan te bieden.
+ *
+ * Bij twijfel leeg: een slug die hier niet in staat geldt verderop als
+ * zichtbaar. Een storing in Firestore mag het menu niet leegmaken.
+ */
+export const getPageIndex = cached(
+  async (): Promise<Record<string, boolean>> => {
+    if (!isAdminUsable()) return {};
+    try {
+      const snap = await adminDb().collection(PAGES).get();
+      const index: Record<string, boolean> = {};
+      for (const doc of snap.docs) {
+        index[doc.id] = (doc.data() as Record<string, unknown>).published !== false;
+      }
+      return index;
+    } catch (error) {
+      console.warn('[content] kon de paginalijst niet lezen:', error);
+      return {};
+    }
+  },
+  ['content', 'page-index'],
+  { tags: [TAGS.pages], revalidate: TTL.content },
+);
+
 export async function getPageForAdmin(slug: string): Promise<CmsPage | null> {
   const snap = await adminDb().collection(PAGES).doc(slug).get();
   if (!snap.exists) return null;

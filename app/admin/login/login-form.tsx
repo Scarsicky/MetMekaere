@@ -16,7 +16,7 @@ import { clientAuth, isClientFirebaseConfigured } from '@/lib/firebase/client';
  * één keer naar de server, die er een sessiecookie van maakt. Daarna zit er
  * geen token meer in de browser.
  */
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, notice }: { next: string; notice?: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const router = useRouter();
@@ -75,6 +75,12 @@ export function LoginForm({ next }: { next: string }) {
         <h1 className="mt-4 text-2xl">Beheer</h1>
         <p className="mt-1.5 text-sand-600">Log in om de website bij te werken.</p>
       </div>
+
+      {notice ? (
+        <p role="status" className="mt-6 rounded-xl bg-sand-200 px-4 py-3 text-sm text-sand-800">
+          {notice}
+        </p>
+      ) : null}
 
       {!configured ? (
         <p role="alert" className="mt-6 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-800">

@@ -101,6 +101,7 @@ export async function saveProductAction(
     compareAtPriceCents: compareAtPriceCents && compareAtPriceCents > priceCents ? compareAtPriceCents : null,
     vatRate: Number(text(formData, 'vatRate')) || 0.21,
     images: json<StoredImage[]>(formData, 'images', []),
+    imageOrientation: text(formData, 'imageOrientation') === 'landscape' ? 'landscape' : 'portrait',
     stock: {
       tracked: checkbox(formData, 'stockTracked'),
       quantity: integer(formData, 'stockQuantity', 0),

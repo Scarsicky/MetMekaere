@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { SessionTimeout } from '@/components/admin/session-timeout';
 import { ADMIN_NAV } from '@/lib/admin/navigation';
 import { cn } from '@/lib/utils';
 
@@ -85,6 +86,8 @@ export function AdminShell({
 
   return (
     <div className="min-h-dvh bg-sand-100">
+      <SessionTimeout />
+
       {/* Bovenbalk: op mobiel het menu, op desktop alleen de accountregel. */}
       <header className="sticky top-0 z-40 border-b border-sand-300 bg-sand-100/95 backdrop-blur-md lg:hidden">
         <div className="flex h-16 items-center justify-between gap-3 px-4">
