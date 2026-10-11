@@ -41,16 +41,21 @@ Zet hem bij de overstap op `https://metmekaere.nl` en rol opnieuw uit.
 > zoekmachines om hem met rust te laten én meldt het beheerscherm *Opstarten*
 > dat het adres nog niet definitief is.
 
-### Nieuwsbrief: eerste echte inschrijving controleren
+### Nieuwsbrief: twee dingen buiten de code
 
-Laposta is aangesloten (oktober 2026, lijst `ptm52s6q9q`). De koppeling is
-nooit met een echte inschrijving beproefd, dus kijk na de eerste aanmelding
-bij *Beheer → Nieuwsbrief* of de status op `subscribed` staat. Blijft hij op
-`pending` hangen, dan staat de foutmelding van Laposta erbij.
+Laposta is aangesloten en beproefd (oktober 2026, lijst `ptm52s6q9q`): een
+inschrijving komt door en het beheer laat per adres zien dát het doorkwam.
 
-Twee dingen die buiten de code liggen en pas opspelen bij je eerste mailing:
-de verwerkersovereenkomst met Laposta moet getekend zijn, en de
-privacyverklaring hoort te vermelden dat adressen naar Laposta gaan.
+Wat nog ligt, en pas opspeelt bij je eerste echte mailing:
+
+- De **verwerkersovereenkomst** met Laposta moet getekend zijn. Zonder weigert
+  Laposta het versturen van campagnes.
+- De **privacyverklaring** hoort te vermelden dat adressen naar Laposta gaan.
+
+Verder is er geen manier om adressen die eerder zijn binnengekomen alsnog naar
+Laposta te sturen; dat kan alleen door de inschrijving te herhalen. Zodra dat
+een keer om iemand anders gaat dan jezelf, is een knop *Nu synchroniseren* in
+het beheer de oplossing.
 
 ### Eigen inhoud
 

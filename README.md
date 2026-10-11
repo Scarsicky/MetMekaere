@@ -295,16 +295,20 @@ staan of later weghalen — beide werken.
 
 ## Nog na te lopen voordat de shop opengaat
 
-De volledige lijst — inclusief techniek-schuld en bewuste keuzes met hun
-aanleiding om terug te komen — staat in [TECHDEBT.md](TECHDEBT.md).
+Twee lijsten, elk met een ander doel:
 
-- **Algemene voorwaarden en privacyverklaring** staan er als werkbare opzet in,
-  maar zijn geen juridisch advies. Lees ze na en vul de bedrijfsgegevens aan.
-- **De voorbeeldproducten en -activiteiten** uit de seed zijn bedoeld om te laten
-  zien hoe alles samenwerkt. Pas ze aan of gooi ze weg.
-- **Het dialect-woordenboek** bevat één woord (`mekaere`), uit de naam zelf. De
-  rest zijn jouw woorden — die wil je niet door een computer laten verzinnen.
-- **Productfoto's** ontbreken nog. Zonder foto staat er een nette plaatshouder.
+- [TESTS.md](TESTS.md) — wat er met de hand getest is en wat nog niet.
+- [TECHDEBT.md](TECHDEBT.md) — techniek-schuld en bewuste keuzes, met per punt
+  de aanleiding om erop terug te komen.
+
+Wat er op dit moment écht nog moet gebeuren voordat de shop opengaat:
+
+- **De Mollie-sleutel** staat nog op `test_`. Er wordt dus geen geld
+  afgeschreven. Het beheerscherm *Opstarten* bewaakt dit zelf.
+- **Het webadres** staat nog op het tijdelijke App Hosting-adres. Daar hangen de
+  terugkeerlink van Mollie, de webhook en de links in bestelmails aan.
+- **Het dialect-woordenboek** is nog niet gevuld; die pagina staat daarom op
+  concept en is nergens op de site te vinden.
 
 ---
 
