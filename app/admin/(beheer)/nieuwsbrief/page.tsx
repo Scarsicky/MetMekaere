@@ -8,12 +8,24 @@ export const metadata = { title: 'Nieuwsbrief' };
 export default async function AdminNewsletterPage() {
   const subscribers = await listSubscribers();
 
-  const subscribed = subscribers.filter((s) => s.status === 'subscribed');
-  const pending = subscribers.filter((s) => s.status === 'pending');
-  const failed = subscribers.filter((s) => s.syncError);
-
   const providerConfigured = isProviderConfigured();
   const providerLabel = configuredProviderLabel();
+
+  const subscribed = subscribers.filter((s) => s.status === 'subscribed');
+  const failed = subscribers.filter((s) => s.syncError);
+
+  /*
+   * 'Nog niet doorgezet' gaat over de mailinglijst, niet over de status hier.
+   *
+   * Die twee zijn niet hetzelfde, en dat verschil heeft ons al een avond
+   * gekost. Een adres krijgt de status 'pending' alleen wanneer de
+   * mailinglijst een fóut teruggaf. Ging er nooit iets heen — omdat er destijds
+   * geen koppeling aanstond — dan staat het adres gewoon op 'subscribed' en
+   * leek er niets aan de hand, terwijl het nergens in een lijst stond.
+   *
+   * Wat telt is dus of er een id van de mailinglijst terugkwam.
+   */
+  const notForwarded = subscribers.filter((s) => s.status !== 'unsubscribed' && !s.providerId);
 
   return (
     <AdminPage
@@ -23,10 +35,12 @@ export default async function AdminNewsletterPage() {
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <StatTile label="Ingeschreven" value={String(subscribed.length)} />
         <StatTile
-          label="Nog niet doorgezet"
-          value={String(pending.length)}
+          label={providerConfigured ? `Nog niet in ${providerLabel}` : 'Nog niet doorgezet'}
+          value={String(notForwarded.length)}
           hint={providerConfigured ? undefined : 'Er is nog geen mailinglijst gekoppeld'}
-          tone={pending.length ? 'attention' : 'plain'}
+          // Alleen opvallend als er een koppeling ís: zonder koppeling staat
+          // alles hier, en dat is dan geen probleem maar een keuze.
+          tone={providerConfigured && notForwarded.length ? 'attention' : 'plain'}
         />
         <StatTile label="Totaal" value={String(subscribers.length)} />
       </div>
