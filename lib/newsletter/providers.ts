@@ -96,15 +96,20 @@ async function subscribeMailerLite(input: SubscribeInput): Promise<ProviderResul
  * ------------------------------------------------------------------ */
 
 /**
- * De naam van het veld in de Laposta-lijst waar de naam in hoort.
+ * De velden in de Laposta-lijst waar een naam in zou passen.
  *
- * Laposta-lijsten hebben alleen `email` vast; al het andere is een veld dat je
- * zelf aanmaakt, met een naam die jij kiest. De sleutel die de API verwacht is
- * de 'relatievariabele' van dat veld. Staat hier een naam die in de lijst niet
- * bestaat, dan weigert Laposta het verzoek — daarom wordt het dan zonder naam
- * opnieuw geprobeerd (zie hieronder). Leeg laten betekent: alleen het adres.
+ * Standaard leeg, en dat is een keuze: het inschrijfformulier vraagt alleen om
+ * een e-mailadres, dus er is meestal geen naam om te versturen. Alleen bij het
+ * afrekenen is er wél een naam bekend — die is dan al voor de bezorging
+ * opgegeven.
+ *
+ * Wil je die alsnog doorgeven, zet deze dan op de relatievariabelen van je
+ * lijst (bij Met Mekaere: `voornaam` en `achternaam`). Klopt een naam niet met
+ * de lijst, dan weigert Laposta het hele verzoek — daarom wordt het dan zonder
+ * naam opnieuw geprobeerd.
  */
-const LAPOSTA_NAME_FIELD = process.env.LAPOSTA_NAME_FIELD ?? 'name';
+const LAPOSTA_FIRSTNAME_FIELD = process.env.LAPOSTA_FIRSTNAME_FIELD ?? '';
+const LAPOSTA_LASTNAME_FIELD = process.env.LAPOSTA_LASTNAME_FIELD ?? '';
 
 interface LapostaResponse {
   member?: { member_id?: string };
@@ -131,8 +136,14 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
        */
       ip: input.ip && input.ip !== 'onbekend' ? input.ip : '0.0.0.0',
     });
-    if (withName && input.name && LAPOSTA_NAME_FIELD) {
-      form.set(`custom_fields[${LAPOSTA_NAME_FIELD}]`, input.name);
+    if (withName) {
+      const { first, last } = splitName(input.name);
+      if (LAPOSTA_FIRSTNAME_FIELD && first) {
+        form.set(`custom_fields[${LAPOSTA_FIRSTNAME_FIELD}]`, first);
+      }
+      if (LAPOSTA_LASTNAME_FIELD && last) {
+        form.set(`custom_fields[${LAPOSTA_LASTNAME_FIELD}]`, last);
+      }
     }
     return form;
   }
@@ -152,18 +163,21 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
     return { res, data };
   }
 
+  const withName = Boolean(input.name && (LAPOSTA_FIRSTNAME_FIELD || LAPOSTA_LASTNAME_FIELD));
+
   try {
-    let { res, data } = await send(Boolean(input.name));
+    let { res, data } = await send(withName);
 
     /*
      * Mislukt het en stuurden we een naam mee, dan is een onbekende veldnaam
      * de waarschijnlijkste oorzaak. Het adres is belangrijker dan de naam, dus
      * dan liever één keer opnieuw zonder.
      */
-    if (!res.ok && input.name) {
+    if (!res.ok && withName) {
       console.warn(
         `[newsletter] Laposta weigerde de inschrijving mét naam (${data.error?.message ?? res.status}); ` +
-          `opnieuw geprobeerd zonder. Klopt LAPOSTA_NAME_FIELD met een veld in de lijst?`,
+          'opnieuw geprobeerd zonder. Kloppen LAPOSTA_FIRSTNAME_FIELD en ' +
+          'LAPOSTA_LASTNAME_FIELD met de velden in de lijst?',
       );
       ({ res, data } = await send(false));
     }
