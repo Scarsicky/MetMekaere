@@ -147,18 +147,22 @@ env:
     availability:
       - RUNTIME
 
-  # De lijst kent naast {{email}} ook {{voornaam}} en {{achternaam}}, maar die
-  # blijven bewust leeg: het inschrijfformulier vraagt alleen om een adres, dus
-  # er valt meestal niets te vullen. Wil je de naam die bij het afrekenen al is
-  # opgegeven tóch doorgeven, zet hier dan voornaam en achternaam neer.
-  - variable: LAPOSTA_FIRSTNAME_FIELD
-    value: ""
-    availability:
-      - RUNTIME
-  - variable: LAPOSTA_LASTNAME_FIELD
-    value: ""
-    availability:
-      - RUNTIME
+  # De lijst kent naast het e-mailadres ook een voornaam en een achternaam.
+  # Die laten we met opzet leeg: het inschrijfformulier vraagt alleen om een
+  # adres, dus er valt meestal niets te vullen.
+  #
+  # Ze staan hier daarom NIET als variabele met een lege waarde. App Hosting
+  # weigerde de hele uitrol daarop, en een geweigerde uitrol is stil: de vorige
+  # versie blijft draaien en alles lijkt gewoon te werken. De code gaat bij een
+  # ontbrekende variabele vanzelf uit van 'geen naam', dus weglaten doet
+  # precies hetzelfde.
+  #
+  # Wil je de naam die bij het afrekenen toch al is opgegeven wél doorgeven,
+  # voeg ze dan hier toe met de waarden voornaam en achternaam:
+  #   - variable: LAPOSTA_FIRSTNAME_FIELD
+  #     value: voornaam
+  #     availability:
+  #       - RUNTIME
 
   - variable: LAPOSTA_API_KEY
     secret: laposta-api-key

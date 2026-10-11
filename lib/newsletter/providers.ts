@@ -211,3 +211,15 @@ export async function sendToProvider(input: SubscribeInput): Promise<ProviderRes
 export function isProviderConfigured(): boolean {
   return providerName() !== 'none';
 }
+
+/** Welke partij er is ingesteld, voor op het scherm. */
+export function configuredProviderLabel(): string {
+  switch (providerName()) {
+    case 'mailerlite':
+      return 'MailerLite';
+    case 'laposta':
+      return 'Laposta';
+    default:
+      return 'geen mailinglijst';
+  }
+}

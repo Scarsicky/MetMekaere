@@ -1,6 +1,6 @@
 import { AdminCard, AdminEmpty, AdminPage, StatTile, StatusPill } from '@/components/admin/ui';
 import { listSubscribers } from '@/lib/newsletter';
-import { isProviderConfigured } from '@/lib/newsletter/providers';
+import { configuredProviderLabel, isProviderConfigured } from '@/lib/newsletter/providers';
 import { formatDateNL } from '@/lib/utils';
 
 export const metadata = { title: 'Nieuwsbrief' };
@@ -12,6 +12,9 @@ export default async function AdminNewsletterPage() {
   const pending = subscribers.filter((s) => s.status === 'pending');
   const failed = subscribers.filter((s) => s.syncError);
 
+  const providerConfigured = isProviderConfigured();
+  const providerLabel = configuredProviderLabel();
+
   return (
     <AdminPage
       title="Nieuwsbrief"
@@ -22,7 +25,7 @@ export default async function AdminNewsletterPage() {
         <StatTile
           label="Nog niet doorgezet"
           value={String(pending.length)}
-          hint={isProviderConfigured() ? undefined : 'Er is nog geen mailinglijst gekoppeld'}
+          hint={providerConfigured ? undefined : 'Er is nog geen mailinglijst gekoppeld'}
           tone={pending.length ? 'attention' : 'plain'}
         />
         <StatTile label="Totaal" value={String(subscribers.length)} />
@@ -95,6 +98,22 @@ export default async function AdminNewsletterPage() {
                             ? 'Uitgeschreven'
                             : 'In afwachting'}
                       </StatusPill>
+
+                      {/*
+                        'Ingeschreven' zei tot nu toe niets over de mailinglijst:
+                        een adres dat hier bleef staan zag er hetzelfde uit als
+                        een adres dat echt was doorgezet. Vandaar deze regel —
+                        zonder die had je het verschil nergens kunnen zien.
+                      */}
+                      {subscriber.status !== 'unsubscribed' ? (
+                        <span className="mt-1 block text-xs text-sand-600">
+                          {subscriber.providerId
+                            ? `In ${providerLabel}`
+                            : providerConfigured
+                              ? `Nog niet in ${providerLabel}`
+                              : 'Alleen hier bewaard'}
+                        </span>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

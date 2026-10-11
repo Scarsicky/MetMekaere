@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { isMailConfigured } from '@/lib/mail';
-import { isProviderConfigured } from '@/lib/newsletter/providers';
+import { configuredProviderLabel, isProviderConfigured } from '@/lib/newsletter/providers';
 import { isMollieConfigured, isMollieTestMode } from '@/lib/shop/mollie';
 import { isTemporaryDomain, siteUrl } from '@/lib/seo';
 
@@ -85,7 +85,10 @@ export function runHealthChecks(): HealthCheck[] {
           id: 'newsletter',
           label: 'Nieuwsbrieflijst',
           status: 'ok',
-          detail: 'Inschrijvingen gaan automatisch naar je mailinglijst.',
+          // De naam erbij: anders is van buitenaf niet te zien welke instelling
+          // de draaiende site werkelijk heeft, en lijkt een stille
+          // inschrijving op een fout die er niet is.
+          detail: `Inschrijvingen gaan automatisch naar ${configuredProviderLabel()}.`,
         }
       : {
           id: 'newsletter',
