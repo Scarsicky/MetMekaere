@@ -47,19 +47,21 @@ Zet hem bij de overstap op `https://metmekaere.nl` en rol opnieuw uit.
 Firestore — je raakt niets kwijt — maar gaan nog niet door naar een mailinglijst.
 Kies MailerLite of Laposta, zet de sleutel als geheim en pas `apphosting.yaml` aan.
 
-### Juridische teksten nalopen
-
-`lib/cms/default-content.ts` bevat een werkbare opzet voor de algemene
-voorwaarden en de privacyverklaring. Het is geen juridisch advies. Lees ze na en
-vul de bedrijfsgegevens aan bij *Instellingen*.
-
 ### Eigen inhoud
 
-- Bedrijfsgegevens invullen: KvK, btw-nummer, adres.
-- De voorbeeldproducten en -activiteiten aanpassen of weggooien.
-- Productfoto's uploaden (zonder foto staat er een plaatshouder).
-- Het dialect-woordenboek vullen. Er staat nu één woord in, `mekaere`, uit de
-  naam zelf — de rest zijn jouw woorden.
+Gedaan (oktober 2026): bedrijfsgegevens, de juridische teksten nagelezen en
+akkoord bevonden, de eigen producten met foto's, en de activiteiten bij
+*Doen en Beleven*.
+
+Wat nog loopt:
+
+- Het dialect-woordenboek vullen. De pagina *Fluffy Dialect* staat op dit
+  moment op concept en is daardoor nergens op de site te vinden — zet hem op
+  gepubliceerd zodra de woorden erin staan.
+
+> De algemene voorwaarden en de privacyverklaring in
+> `lib/cms/default-content.ts` zijn een werkbare opzet, geen juridisch advies.
+> Dat blijft zo, ook nu ze zijn nagelezen.
 
 ---
 
@@ -106,7 +108,7 @@ opslaan van een pagina ooit stilletjes faalt.
 
 ### Geen geautomatiseerde test van het bestelproces
 
-De rekenkern en de losse beslisregels hebben tests (62 stuks), maar het pad
+De rekenkern en de losse beslisregels hebben tests (72 stuks), maar het pad
 *winkelwagen → afrekenen → betalen → voorraad afboeken* is met de hand getest,
 niet geautomatiseerd. Bij een verbouwing van de checkout is dat het eerste wat
 je mist.
