@@ -68,8 +68,11 @@ Bijgewerkt: 11 oktober 2026.
 - [ ] **Afrekenen met de échte iDEAL-app op een telefoon.** Kan pas na het
       omzetten naar de live-sleutel. Het wisselen naar de bankapp en weer terug
       is het enige stuk dat de simulatie niet nabootst.
-- [ ] **Inloggen op het beheer in Safari.** Ging mis na het invoeren van de
-      sessiegrenzen; hersteld op 14 oktober 2026, nog niet bevestigd.
+- [ ] **Inloggen op het beheer in Safari.** Lukte niet op een MacBook met een
+      Safari ouder dan 16.4 — dat is de ondergrens van Next.js en daar is in
+      onze code niets aan te doen (zie README). Het leek een regressie van de
+      sessiegrenzen, maar dat was toeval. Opnieuw proberen zodra die Mac is
+      bijgewerkt.
 - [ ] **Betaald → terugbetaald.** Verzonden → geannuleerd is gedaan, deze nog
       niet. Let op dat de voorraad terugkomt.
 - [ ] **Kortingscodes expres fout laten gaan**: verlopen, maximum bereikt,

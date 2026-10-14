@@ -21,6 +21,23 @@ Twee regels waar de hele shop op rust. Wijk er niet van af, ook niet "even snel"
 De rekenkern heeft eigen tests: `npm test`. Verander je iets aan prijzen of
 staffels, draai die dan.
 
+### Welke browsers dit draait
+
+Next.js 16 stelt een ondergrens: **Chrome 111+, Edge 111+, Firefox 111+ en
+Safari 16.4+**. Dat is geen richtlijn maar een harde grens — de code bevat
+syntax die oudere browsers niet eens kunnen lézen.
+
+Dat valt op een vervelende manier uit, want Safari zit vast aan de macOS-versie.
+Een Mac die niet verder kan dan Safari 15 kan het beheer dus niet gebruiken,
+terwijl Chrome op diezelfde Mac het wel doet — die brengt zijn eigen motor mee.
+
+Het beeld bij een te oude browser: de pagina laadt, maar er gebeurt niets meer
+bij klikken. Inloggen stuurt je zonder melding terug naar het inlogscherm, want
+dan verstuurt de browser het formulier op de ouderwetse manier en draait onze
+eigen foutafhandeling ook niet. In de console van de browser staat dan een
+syntaxfout. Zoek in dat geval niet in onze code — kijk eerst welke browserversie
+het is.
+
 ---
 
 ## Aan de slag
