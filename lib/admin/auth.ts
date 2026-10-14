@@ -161,24 +161,54 @@ async function isIdleTooLong(uid: string): Promise<boolean> {
 }
 
 /** De ingelogde beheerder, of `null`. Veilig tijdens renderen. */
-export async function currentAdmin(): Promise<AdminUser | null> {
+/**
+ * Waarom iemand niet binnen mag. Deze reden gaat mee naar het inlogscherm.
+ *
+ * Zonder dit is een geweigerde sessie stil: je komt terug op het inlogformulier
+ * zonder dat iemand — ook ik niet — kan zien wat er misging. En de vier
+ * oorzaken hieronder vragen om heel verschillende oplossingen.
+ */
+export type AdminDenialReason =
+  /** Er kwam helemaal geen sessiecookie mee met het verzoek. */
+  | 'geen-cookie'
+  /** Er was een cookie, maar Firebase keurde hem af. */
+  | 'ongeldig'
+  /** Geldige sessie, maar dit account is geen beheerder. */
+  | 'geen-rechten'
+  /** Te lang niets gedaan. */
+  | 'te-lang-stil';
+
+export type AdminCheck = { admin: AdminUser } | { admin: null; reason: AdminDenialReason };
+
+export async function checkAdmin(): Promise<AdminCheck> {
   const store = await cookies();
   const session = store.get(SESSION_COOKIE)?.value;
-  if (!session) return null;
+  if (!session) return { admin: null, reason: 'geen-cookie' };
 
   try {
     const decoded = await adminAuth().verifySessionCookie(session, true);
-    if (!(await hasAdminAccess(decoded.uid, decoded.admin === true))) return null;
-    if (await isIdleTooLong(decoded.uid)) return null;
+    if (!(await hasAdminAccess(decoded.uid, decoded.admin === true))) {
+      return { admin: null, reason: 'geen-rechten' };
+    }
+    if (await isIdleTooLong(decoded.uid)) {
+      return { admin: null, reason: 'te-lang-stil' };
+    }
     return {
-      uid: decoded.uid,
-      email: decoded.email ?? '',
-      name: typeof decoded.name === 'string' ? decoded.name : undefined,
+      admin: {
+        uid: decoded.uid,
+        email: decoded.email ?? '',
+        name: typeof decoded.name === 'string' ? decoded.name : undefined,
+      },
     };
   } catch {
     // Verlopen of ingetrokken: gewoon uitgelogd.
-    return null;
+    return { admin: null, reason: 'ongeldig' };
   }
+}
+
+/** De ingelogde beheerder, of `null`. Veilig tijdens renderen. */
+export async function currentAdmin(): Promise<AdminUser | null> {
+  return (await checkAdmin()).admin;
 }
 
 /**
@@ -187,8 +217,11 @@ export async function currentAdmin(): Promise<AdminUser | null> {
  * een actie niet alsnog los te gebruiken is zonder sessie.
  */
 export async function requireAdmin(): Promise<AdminUser> {
-  const admin = await currentAdmin();
-  if (!admin) redirect('/admin/login');
+  const result = await checkAdmin();
+  // De reden gaat mee, zodat het inlogscherm kan uitleggen wat er misging in
+  // plaats van zwijgend het formulier opnieuw te tonen.
+  if (!result.admin) redirect(`/admin/login?reden=${result.reason}`);
+  const admin = result.admin;
 
   /*
    * Het beheer gebruiken telt als teken van leven.
