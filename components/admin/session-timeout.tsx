@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 import {
@@ -24,34 +23,52 @@ import {
  *     waar niets meer werkt — en dat merk je dan pas als je op opslaan drukt.
  */
 export function SessionTimeout() {
-  const router = useRouter();
   const lastActivity = useRef(Date.now());
   const lastPing = useRef(0);
   const endingSession = useRef(false);
 
   useEffect(() => {
-    async function endSession(reason: 'inactief' | 'verlopen') {
+    async function endSession() {
       if (endingSession.current) return;
       endingSession.current = true;
 
       try {
-        await fetch('/api/admin/session', { method: 'DELETE' });
+        await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' });
       } catch {
         // Niet kunnen uitloggen mag het doorsturen niet tegenhouden.
       }
-      router.replace(`/admin/login?reden=${reason}`);
-      router.refresh();
+      // Hele pagina opnieuw laden, geen navigatie binnen de app: zo is zeker
+      // dat er niets van de vorige sessie op het scherm achterblijft.
+      window.location.assign('/admin/login?reden=inactief');
     }
 
     async function ping() {
       lastPing.current = Date.now();
       try {
-        const response = await fetch('/api/admin/activity', { method: 'POST' });
-        if (response.status === 401) await endSession('verlopen');
+        /*
+         * `credentials` staat er met opzet bij. Same-origin is weliswaar de
+         * standaard, maar niet in elke browser even lang, en zonder de
+         * sessiecookie komt dit verzoek als 'niet ingelogd' aan.
+         */
+        await fetch('/api/admin/activity', { method: 'POST', credentials: 'same-origin' });
       } catch {
         // Even geen verbinding: volgende keer weer. De server bewaakt de grens.
       }
     }
+
+    /*
+     * Hier stond: bij een 401 meteen uitloggen. Dat is eruit, en dat was een
+     * echte fout.
+     *
+     * Eén mislukt achtergrondverzoek is geen bewijs dat de sessie voorbij is.
+     * Een haperende verbinding, of een browser die de cookie net even anders
+     * meestuurt, zette iemand er zo meteen uit — en omdat dit vlak na het
+     * inloggen voor het eerst draait, leek dat op 'inloggen lukt niet'.
+     *
+     * De server blijft de baas: is de sessie echt voorbij, dan merk je dat bij
+     * de volgende pagina of handeling, en stuurt de server je netjes naar het
+     * inlogscherm. Wat hieronder overblijft is de klok, en die liegt niet.
+     */
 
     function onActivity() {
       lastActivity.current = Date.now();
@@ -67,7 +84,7 @@ export function SessionTimeout() {
       // de sessie eindeloos verlengen.
       if (document.visibilityState !== 'visible') return;
       if (Date.now() - lastActivity.current > IDLE_TIMEOUT_MS) {
-        void endSession('inactief');
+        void endSession();
         return;
       }
       onActivity();
@@ -75,7 +92,7 @@ export function SessionTimeout() {
     document.addEventListener('visibilitychange', onVisible);
 
     const timer = window.setInterval(() => {
-      if (Date.now() - lastActivity.current > IDLE_TIMEOUT_MS) void endSession('inactief');
+      if (Date.now() - lastActivity.current > IDLE_TIMEOUT_MS) void endSession();
     }, IDLE_CHECK_MS);
 
     return () => {
@@ -83,7 +100,7 @@ export function SessionTimeout() {
       document.removeEventListener('visibilitychange', onVisible);
       window.clearInterval(timer);
     };
-  }, [router]);
+  }, []);
 
   return null;
 }

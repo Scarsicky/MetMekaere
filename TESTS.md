@@ -36,6 +36,9 @@ Bijgewerkt: 11 oktober 2026.
 - [x] **Opties op een bestelling** — en ze blijven buiten het staffelvoordeel
 - [x] **Uitverkocht terwijl het al in de winkelwagen zit** — met de juiste
       melding
+- [x] **Bestellen en betalen vanaf een telefoon** — met de betaalsimulatie van
+      Mollie. De terugkeer naar de shop gaat goed en de status in het beheer
+      klopt. Met de échte iDEAL-app kan dit pas als de live-sleutel erin staat.
 
 ### Prijzen en verzending
 
@@ -62,9 +65,11 @@ Bijgewerkt: 11 oktober 2026.
 
 ### Belangrijk voor de opening
 
-- [ ] **Afrekenen op een echte telefoon**, met de echte iDEAL-app. De betaling
-      is Mollie's werk, maar het formulier op een klein scherm en de terugkeer
-      ná het wisselen naar de bankapp zijn van ons.
+- [ ] **Afrekenen met de échte iDEAL-app op een telefoon.** Kan pas na het
+      omzetten naar de live-sleutel. Het wisselen naar de bankapp en weer terug
+      is het enige stuk dat de simulatie niet nabootst.
+- [ ] **Inloggen op het beheer in Safari.** Ging mis na het invoeren van de
+      sessiegrenzen; hersteld op 14 oktober 2026, nog niet bevestigd.
 - [ ] **Betaald → terugbetaald.** Verzonden → geannuleerd is gedaan, deze nog
       niet. Let op dat de voorraad terugkomt.
 - [ ] **Kortingscodes expres fout laten gaan**: verlopen, maximum bereikt,

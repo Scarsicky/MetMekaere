@@ -114,6 +114,21 @@ export async function destroyAdminSession(): Promise<void> {
  * eens per paar minuten aantikt. Mislukken mag: dan blijft de vorige tijd
  * staan en val je hooguit eerder uit de sessie.
  */
+/**
+ * Rem op het bijwerken: zonder deze zou elke pagina in het beheer een
+ * schrijfactie worden. Per draaiend exemplaar; meer is hier niet nodig, want
+ * te vaak schrijven is hooguit verspilling en nooit fout.
+ */
+const lastTouched = new Map<string, number>();
+const TOUCH_THROTTLE_MS = 60 * 1000;
+
+function shouldTouchActivity(uid: string): boolean {
+  const previous = lastTouched.get(uid) ?? 0;
+  if (Date.now() - previous < TOUCH_THROTTLE_MS) return false;
+  lastTouched.set(uid, Date.now());
+  return true;
+}
+
 export async function touchActivity(uid: string): Promise<void> {
   try {
     await adminDb()
@@ -174,5 +189,22 @@ export async function currentAdmin(): Promise<AdminUser | null> {
 export async function requireAdmin(): Promise<AdminUser> {
   const admin = await currentAdmin();
   if (!admin) redirect('/admin/login');
+
+  /*
+   * Het beheer gebruiken telt als teken van leven.
+   *
+   * Dit hing eerst alleen aan een verzoekje dat de browser op de achtergrond
+   * stuurt. Dat is te wankel: komt dat in een bepaalde browser niet aan, dan
+   * vliegt iemand er na een half uur werken alsnog uit terwijl hij de hele tijd
+   * bezig was. Elke pagina en elke handeling in het beheer komt hier langs, dus
+   * dit is de eerlijkere maatstaf.
+   *
+   * Hooguit eens per minuut, en zonder erop te wachten: de pagina hoeft hier
+   * niet voor stil te staan, en gaat het mis dan is de volgende klik er zo weer.
+   */
+  if (shouldTouchActivity(admin.uid)) {
+    void touchActivity(admin.uid);
+  }
+
   return admin;
 }

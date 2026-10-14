@@ -2,7 +2,6 @@
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,6 @@ import { clientAuth, isClientFirebaseConfigured } from '@/lib/firebase/client';
 export function LoginForm({ next, notice }: { next: string; notice?: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
   const emailId = useId();
   const passwordId = useId();
 
@@ -51,8 +49,16 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
         return;
       }
 
-      router.replace(next);
-      router.refresh();
+      /*
+       * Met opzet een volledige paginalading en geen navigatie binnen de app.
+       *
+       * De sessiecookie is net gezet in het antwoord op bovenstaand verzoek.
+       * Navigeert de app zelf door, dan gaat het volgende verzoek er soms
+       * vandoor voordat de browser die cookie heeft vastgelegd — en dan kom je
+       * zonder sessie aan en sta je zo weer op dit scherm. Browsers verschillen
+       * daarin. Een echte paginalading kent die wedloop niet.
+       */
+      window.location.assign(next);
     } catch (caught) {
       const code = (caught as { code?: string }).code ?? '';
       setError(
