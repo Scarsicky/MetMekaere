@@ -34,6 +34,7 @@ Bijgewerkt: 11 oktober 2026.
 - [x] Verzonden → geannuleerd (hier kwam de dubbele bestelbevestiging aan het
       licht; gerepareerd en opnieuw getest)
 - [x] **Opties op een bestelling** — en ze blijven buiten het staffelvoordeel
+      (met één keuzegroep; met twéé groepen ging het mis, hersteld 19 oktober)
 - [x] **Uitverkocht terwijl het al in de winkelwagen zit** — met de juiste
       melding
 - [x] **Bestellen en betalen vanaf een telefoon** — met de betaalsimulatie van
@@ -80,6 +81,10 @@ Bijgewerkt: 11 oktober 2026.
       een begrijpelijke melding te geven.
 
 ### Nieuw en nog niet beproefd
+
+- [ ] **Een product met twee keuzegroepen bestellen.** Kiezen werkt weer, maar
+      de hele weg — in de winkelwagen, op de bestelling, in de bevestigingsmail —
+      is met twee groepen nog niet doorlopen.
 
 - [ ] **Een product met een liggend ontwerp** — de instelling *Vorm van de
       foto's* bij *Foto's*
