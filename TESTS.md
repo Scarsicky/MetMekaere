@@ -3,7 +3,7 @@
 Deze lijst gaat over dingen die een mens moet doen. De rekenkern en de losse
 beslisregels hebben hun eigen tests (`npm test`); die staan hier niet in.
 
-Bijgewerkt: 11 oktober 2026.
+Bijgewerkt: 19 oktober 2026.
 
 ---
 
@@ -55,10 +55,23 @@ Bijgewerkt: 11 oktober 2026.
 - [x] Een pagina op *concept* verdwijnt uit het menu, uit de footer én uit de
       sitemap, en geeft een 404
 
+- [x] **Betaald → terugbetaald**, inclusief het terugzetten van de voorraad
+- [x] **De shop sluiten** met de schakelaar bij *Instellingen*. In winkelwagen
+      leggen kan dan ook niet meer, dus een klant kan niet per ongeluk alsnog
+      bestellen.
+
 ### Nieuwsbrief
 
 - [x] Inschrijven via de footer
 - [x] Adres komt door in Laposta, en het beheer laat zien dát het doorkwam
+
+### Beheer in de browser
+
+- [x] **Inloggen in Safari**, na het bijwerken naar 16.4 of nieuwer. Daaronder
+      lukt het niet en is er in onze code niets aan te doen; zie de README.
+- [x] **Automatisch uitloggen** na dertig minuten stilte
+- [x] **Een product met een liggend ontwerp** — de instelling *Vorm van de
+      foto's*
 
 ---
 
@@ -69,35 +82,21 @@ Bijgewerkt: 11 oktober 2026.
 - [ ] **Afrekenen met de échte iDEAL-app op een telefoon.** Kan pas na het
       omzetten naar de live-sleutel. Het wisselen naar de bankapp en weer terug
       is het enige stuk dat de simulatie niet nabootst.
-- [ ] **Inloggen op het beheer in Safari.** Lukte niet op een MacBook met een
-      Safari ouder dan 16.4 — dat is de ondergrens van Next.js en daar is in
-      onze code niets aan te doen (zie README). Het leek een regressie van de
-      sessiegrenzen, maar dat was toeval. Opnieuw proberen zodra die Mac is
-      bijgewerkt.
-- [ ] **Betaald → terugbetaald.** Verzonden → geannuleerd is gedaan, deze nog
-      niet. Let op dat de voorraad terugkomt.
 - [ ] **Kortingscodes expres fout laten gaan**: verlopen, maximum bereikt,
       onder het minimumbedrag, en een code die niet bestaat. Alle vier horen
       een begrijpelijke melding te geven.
-
-### Nieuw en nog niet beproefd
-
 - [ ] **Een product met twee keuzegroepen bestellen.** Kiezen werkt weer, maar
       de hele weg — in de winkelwagen, op de bestelling, in de bevestigingsmail —
       is met twee groepen nog niet doorlopen.
 
-- [ ] **Een product met een liggend ontwerp** — de instelling *Vorm van de
-      foto's* bij *Foto's*
-- [ ] **Automatisch uitloggen**: dertig minuten niets doen in het beheer
-- [ ] **De waarschuwingsmail bij te weinig voorraad.** Lastig met opzet uit te
-      lokken: er moeten twee mensen tegelijk het laatste exemplaar afrekenen.
-
 ### Rustig aan
 
-- [ ] De shop sluiten met de schakelaar bij *Instellingen*
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
 - [ ] **De adventskalender.** Deelt de collectie `activities` met de oude app.
       Een droogloop vóór december is aangenamer dan een verrassing op de eerste.
+- [ ] **De waarschuwingsmail bij te weinig voorraad.** Lastig met opzet uit te
+      lokken: er moeten twee mensen tegelijk het laatste exemplaar afrekenen.
+      Zou ik laten rusten tot het een keer vanzelf gebeurt.
 
 ---
 
