@@ -152,6 +152,19 @@ gemarkeerd in het beheer met hoeveel er tekort was.
 *Aanleiding om terug te komen:* als dubbelverkoop in de praktijk voorkomt. Dan
 is reserveren-bij-order met een vervaltijd de volgende stap.
 
+### Het overzicht houdt één vorm, ook bij liggende foto's
+
+Een product kan staand of liggend zijn. Op de productpagina krijgt de foto die
+vorm ook echt, maar in het overzicht blijft elke tegel staand: een liggende foto
+wordt daar passend getoond in plaats van bijgesneden.
+
+Het alternatief — de tegel de vorm van het product laten volgen — is één regel,
+maar dan staan titels en prijzen in een rij niet meer op één lijn. Afgewogen en
+afgewezen (oktober 2026): dat oogt rommeliger dan een foto met wat lucht eromheen.
+
+*Aanleiding om terug te komen:* niet. Dit is bekeken met echte producten erin en
+zo besloten.
+
 ### Geen offline-modus
 
 De oude adventskalender had een service worker. Op een webshop is dat riskant:
