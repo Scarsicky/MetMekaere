@@ -157,8 +157,19 @@ export function AddToCartForm({
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="productId" value={product.id} />
 
+      {/*
+        De keuzerondjes heten per groep anders, maar de server verwacht alle
+        gekozen opties onder één naam. Vandaar deze verborgen velden: ze dragen
+        de keuze over zonder dat de groepen in de browser door elkaar gaan lopen.
+      */}
+      {[...groups.values()].flat().map((addon) =>
+        chosen[addon.id] ? (
+          <input key={addon.id} type="hidden" name="addon" value={addon.id} />
+        ) : null,
+      )}
+
       {/* Keuzegroepen: precies één optie */}
-      {[...groups.entries()].map(([group, addons]) => (
+      {[...groups.entries()].map(([group, addons], groupIndex) => (
         <fieldset key={group}>
           <legend className="font-display text-sm font-bold tracking-wide text-sand-900 uppercase">
             {group}
@@ -171,7 +182,17 @@ export function AddToCartForm({
               >
                 <input
                   type="radio"
-                  name="addon"
+                  /*
+                   * Elke groep een eigen naam. Keuzerondjes met dezelfde naam
+                   * vormen in de browser één groep, hoe ze op het scherm ook
+                   * verdeeld staan — met één naam voor alles zette het kiezen
+                   * van een kleur dus de gekozen vorm weer uit.
+                   *
+                   * De volgnummer en niet de groepsnaam: die naam typt de
+                   * beheerder zelf, en twee groepen mogen nooit per ongeluk
+                   * dezelfde veldnaam krijgen.
+                   */
+                  name={`optie-${groupIndex}`}
                   value={addon.id}
                   checked={Boolean(chosen[addon.id])}
                   onChange={() => {

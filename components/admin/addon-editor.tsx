@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { centsToInput, parseMoneyToCents } from '@/lib/money';
-import { slugify } from '@/lib/utils';
 import type { ProductAddon } from '@/types';
 
 /**
@@ -34,8 +33,38 @@ function toAddon(draft: Draft): ProductAddon {
   };
 }
 
+function freshId(): string {
+  return `optie-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/**
+ * Keuzes met hetzelfde id uit elkaar trekken.
+ *
+ * Een eerdere versie leidde het id af uit de naam terwijl je typte, en pakte
+ * daarbij alleen de eerste letter. Twee keuzes die met dezelfde letter
+ * beginnen — 'Hoog' en 'Horizontaal' — kregen daardoor hetzelfde id, en in de
+ * winkel selecteerde het aanklikken van de ene dan ook de andere.
+ *
+ * Bestaande producten dragen die botsing nog met zich mee. Door hem hier bij
+ * het openen op te lossen, repareert het opnieuw opslaan van zo'n product het
+ * vanzelf. Alleen botsingen worden aangeraakt; een id dat al uniek is blijft
+ * staan, want dat kan in bestellingen voorkomen.
+ */
+function withUniqueIds(drafts: Draft[]): Draft[] {
+  const seen = new Set<string>();
+  return drafts.map((draft) => {
+    if (!draft.id || seen.has(draft.id)) {
+      const replacement = freshId();
+      seen.add(replacement);
+      return { ...draft, id: replacement };
+    }
+    seen.add(draft.id);
+    return draft;
+  });
+}
+
 export function AddonEditor({ name, initial }: { name: string; initial: ProductAddon[] }) {
-  const [drafts, setDrafts] = useState<Draft[]>(() => initial.map(toDraft));
+  const [drafts, setDrafts] = useState<Draft[]>(() => withUniqueIds(initial.map(toDraft)));
 
   function update(index: number, patch: Partial<Draft>) {
     setDrafts((current) => current.map((d, i) => (i === index ? { ...d, ...patch } : d)));
@@ -45,7 +74,7 @@ export function AddonEditor({ name, initial }: { name: string; initial: ProductA
     setDrafts((current) => [
       ...current,
       {
-        id: `optie-${current.length + 1}-${Math.random().toString(36).slice(2, 6)}`,
+        id: freshId(),
         label: '',
         description: '',
         priceInput: '0,00',
@@ -73,16 +102,19 @@ export function AddonEditor({ name, initial }: { name: string; initial: ProductA
           {drafts.map((draft, index) => (
             <li key={draft.id} className="rounded-xl border border-sand-300 bg-white p-4">
               <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
+                {/*
+                  Het id blijft met rust. Het volgde eerst de naam die je typte,
+                  met twee gevolgen: het bleef hangen op de eerste letter, en de
+                  rij wordt op dat id gesleuteld — dus bouwde React dit veld na
+                  de eerste aanslag opnieuw op en was je je cursor kwijt.
+
+                  Een leesbaar id was alleen maar mooi; uniek en onveranderlijk
+                  is wat het moet zijn.
+                */}
                 <Text
                   label="Wat de klant ziet"
                   value={draft.label}
-                  onChange={(value) =>
-                    update(index, {
-                      label: value,
-                      // Het id volgt de naam, maar alleen zolang het nog niet is opgeslagen.
-                      id: draft.label === '' ? slugify(value) || draft.id : draft.id,
-                    })
-                  }
+                  onChange={(value) => update(index, { label: value })}
                   placeholder="Met envelop"
                 />
                 <Text
