@@ -89,6 +89,13 @@ Bijgewerkt: 19 oktober 2026.
       de hele weg — in de winkelwagen, op de bestelling, in de bevestigingsmail —
       is met twee groepen nog niet doorlopen.
 
+### Nieuw en nog niet beproefd
+
+- [ ] **Foto's worden bij het uploaden verkleind.** Terug naar maximaal 1600
+      punten en opgeslagen als WebP. Let op de regel die meldt hoeveel het
+      scheelde, en kijk of het beeld scherp genoeg blijft — een ontwerp met
+      dunne lijnen of kleine letters is daarvoor de zwaarste proef.
+
 ### Rustig aan
 
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
