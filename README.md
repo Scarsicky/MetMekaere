@@ -290,19 +290,60 @@ De site pikt de nieuwe waarde op bij de volgende uitrol.
 
 ### 6. Het domein verhuizen
 
-Nu pas. In de Firebase-console → App Hosting → je backend → **Custom domain**
-voeg je `metmekaere.nl` en `www.metmekaere.nl` toe. Je krijgt DNS-records die je
-bij je domeinprovider zet.
+Het domein staat nu op Firebase Hosting: `metmekaere.nl` wijst naar
+`199.36.158.100`, en `www` is daar een CNAME naartoe. Dat moet naar App Hosting.
 
-Let op: `metmekaere.nl` wijst nu naar Firebase Hosting (`199.36.158.100`). Die
-records vervang je. Haal daarvóór het domein uit Firebase Hosting, anders
-claimen twee diensten hetzelfde adres.
+De volgorde hieronder is zo gekozen dat bezoekers er niets van merken. Het
+geheim zit hem erin dat het certificaat via DNS wordt aangevraagd, en dus al
+geregeld kan zijn vóórdat je het verkeer omzet.
 
-DNS heeft tijd nodig — reken op een paar uur, soms een etmaal. In die periode
-kunnen bezoekers nog de oude site zien; dat lost zichzelf op.
+**Stap 0, minstens een halve dag van tevoren: verlaag de TTL.**
+Zet de TTL van het A-record van `metmekaere.nl` en van het CNAME van `www` op
+300 seconden, en wacht dan minstens zo lang als de óude TTL was (vier uur, tenzij
+je hem eerder hebt aangepast). Pas daarna heeft elke resolver ter wereld de korte
+TTL opgepikt. Vanaf dat moment duurt een wijziging — en ook het terugdraaien
+ervan — minuten in plaats van uren. Dit is het hele verschil tussen een rustige
+en een spannende middag.
 
-Zet tot slot `NEXT_PUBLIC_SITE_URL` in `apphosting.yaml` op `https://metmekaere.nl`
-en rol nog één keer uit, zodat de sitemap en de deellinks kloppen.
+**Stap 1: domein toevoegen in de console.**
+Firebase-console → App Hosting → je backend → *Settings* → **Add custom domain**.
+Voeg `metmekaere.nl` toe en laat `www.metmekaere.nl` daarheen doorverwijzen.
+
+**Stap 2: alleen de records die géén verkeer verplaatsen.**
+De wizard geeft je onder meer een CNAME op `_acme-challenge…` en mogelijk een
+TXT met `fah-claim=…`. Zet die klaar, maar **laat het bestaande A-record nog
+staan**. Je site blijft gewoon draaien waar hij draait.
+
+> Dat `_acme-challenge`-record moet blijven staan, ook na de verhuizing. Haal je
+> het later weg, dan kan het certificaat niet meer vernieuwd worden en loopt de
+> site op een dag uit zijn beveiliging.
+
+**Stap 3: wachten op het certificaat.**
+De console meldt wanneer het klaar is. Reken op een paar uur, soms langer.
+
+**Stap 4: het verkeer omzetten.**
+Vervang nu pas het A-record `199.36.158.100` door het adres dat de wizard geeft,
+en haal het domein weg bij Firebase Hosting. Met een TTL van 300 is dit binnen
+een paar minuten overal zichtbaar.
+
+**Stap 5: de site zelf.**
+Zet `NEXT_PUBLIC_SITE_URL` in `apphosting.yaml` op `https://metmekaere.nl` en rol
+uit. Daar hangen de canonieke links, de sitemap, de terugkeerlink van Mollie, de
+webhook én de links in bestelmails aan.
+
+**Stap 6: na een dag of twee rust de TTL weer omhoog**, bijvoorbeeld naar 3600.
+
+#### Waar je vanaf blijft
+
+- **De MX-records.** Dat is je mail; die staat los van de website.
+- **Het SPF-record.** Na de verhuizing wijst het `a`-deel daarin naar het nieuwe
+  webadres in plaats van naar Firebase Hosting. Je mail gaat via Hostnet en valt
+  onder `include:_spf.hostnet.nl`, dus dat hoort niets uit te maken — maar draai
+  na de verhuizing wel even mail-tester opnieuw, want die 10/10 wil je houden.
+
+Mocht de wizard weigeren te verifiëren zolang het oude A-record er nog staat, dan
+vervalt de omweg en zet je het A-record meteen om. Dankzij stap 0 is het venster
+dan een paar minuten in plaats van vier uur.
 
 ### 7. De oude adventskalender
 
