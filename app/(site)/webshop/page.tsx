@@ -1,12 +1,18 @@
 import { ShopListing } from '@/components/shop/shop-listing';
+import { getShopSettings } from '@/lib/data/settings';
 import { buildMetadata } from '@/lib/seo';
+import { DEFAULT_SHOP_INTRO } from '@/lib/shop/shop-copy';
 import type { SearchParams } from '@/lib/shop/filters';
 
 export async function generateMetadata() {
+  // Dezelfde tekst als op de pagina zelf. Stonden die los van elkaar, dan zou
+  // een aanpassing in het beheer de pagina wél veranderen en wat Google toont
+  // niet.
+  const shop = await getShopSettings();
+
   return buildMetadata({
     title: 'Webshop',
-    description:
-      'Kaarten om te sturen en kleine dingen om weg te geven. Hoe meer kaarten je meeneemt, hoe voordeliger — ook als je verschillende ontwerpen kiest.',
+    description: shop.shopIntro ?? DEFAULT_SHOP_INTRO,
     path: '/webshop',
   });
 }

@@ -122,6 +122,7 @@ export async function saveShopSettingsAction(
         shippingCountries: countries,
         facets: parseFacets(text(formData, 'facets')),
         orderNotificationEmail: notificationEmail,
+        shopIntro: text(formData, 'shopIntro') || null,
         checkoutNote: text(formData, 'checkoutNote') || null,
         tierNote: text(formData, 'tierNote') || null,
         closed: checkbox(formData, 'closed'),

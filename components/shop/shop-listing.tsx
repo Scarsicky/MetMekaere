@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { DEFAULT_SHOP_INTRO } from '@/lib/shop/shop-copy';
 import { FilterPanel, SortSelect } from '@/components/shop/filter-panel';
 import { ProductGrid } from '@/components/shop/product-card';
 import { ButtonLink } from '@/components/ui/button';
@@ -74,9 +75,12 @@ export async function ShopListing({
           </nav>
 
           <h1 className="text-3xl md:text-4xl">{category ? category.name : 'Webshop'}</h1>
+          {/*
+            Een categorie heeft zijn eigen beschrijving; de winkel zelf haalt
+            zijn tekst uit de instellingen, zodat het beheer hem kan aanpassen.
+          */}
           <p className="mt-3 max-w-prose text-lg leading-relaxed text-sand-700">
-            {category?.description ??
-              'Kaarten om te sturen en kleine dingen om weg te geven. Hoe meer kaarten je meeneemt, hoe voordeliger — ook als je verschillende ontwerpen kiest.'}
+            {category?.description ?? shopSettings.shopIntro ?? DEFAULT_SHOP_INTRO}
           </p>
         </Container>
       </div>

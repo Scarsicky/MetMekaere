@@ -561,6 +561,11 @@ export interface ShopSettings {
   facets: { key: string; label: string }[];
   /** Naar welk adres ordermeldingen gaan. */
   orderNotificationEmail: string;
+  /**
+   * De tekst onder de kop op /webshop. Categorieën hebben hun eigen
+   * beschrijving; dit is die van de winkel zelf.
+   */
+  shopIntro?: string;
   /** Vrije tekst onder de checkout, bv. levertijd. */
   checkoutNote?: string;
   /** Tekst bij het staffelvoordeel in de winkelwagen. */

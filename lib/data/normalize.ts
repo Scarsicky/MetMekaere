@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { DEFAULT_SHOP_INTRO } from '@/lib/shop/shop-copy';
 import type {
   AdventSettings,
   Block,
@@ -606,6 +607,8 @@ export function normalizeShopSettings(raw: Raw | null): ShopSettings {
     shippingCountries: countries.length ? countries : DEFAULT_SHOP.shippingCountries,
     facets: facets.length ? facets : DEFAULT_SHOP.facets,
     orderNotificationEmail: str(raw.orderNotificationEmail, DEFAULT_SHOP.orderNotificationEmail),
+    // Leeg laten betekent: de standaardtekst. Zie lib/shop/shop-copy.ts.
+    shopIntro: optionalStr(raw.shopIntro) ?? DEFAULT_SHOP_INTRO,
     checkoutNote: optionalStr(raw.checkoutNote),
     tierNote: optionalStr(raw.tierNote),
     closed: bool(raw.closed, false),

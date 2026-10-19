@@ -165,6 +165,15 @@ export default async function AdminSettingsPage() {
                 </Field>
 
                 <Field
+                  label="Tekst onder de kop van de webshop"
+                  htmlFor="shopIntro"
+                  optional
+                  hint="Het stukje tekst onder ‘Webshop’. Categorieën hebben hun eigen beschrijving; die zet je bij Categorieën. Laat je dit leeg, dan komt de standaardtekst terug."
+                >
+                  <Textarea id="shopIntro" name="shopIntro" rows={3} defaultValue={shop.shopIntro ?? ''} />
+                </Field>
+
+                <Field
                   label="Tekst bij het afrekenen"
                   htmlFor="checkoutNote"
                   optional
