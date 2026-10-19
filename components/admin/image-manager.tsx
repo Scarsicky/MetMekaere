@@ -4,8 +4,16 @@ import Image from 'next/image';
 import { useId, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { shrinkForUpload } from '@/lib/admin/shrink-image';
 import { cn } from '@/lib/utils';
 import type { StoredImage } from '@/types';
+
+/** Bespaarde bytes als een leesbaar getal: '1,4 MB' of '320 KB'. */
+function formatSaved(bytes: number): string {
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1) return `${mb.toFixed(1).replace('.', ',')} MB`;
+  return `${Math.round(bytes / 1024)} KB`;
+}
 
 /**
  * Foto's beheren: uploaden, op volgorde zetten, beschrijving invullen,
@@ -59,6 +67,7 @@ export function ImageManager({
   }
 
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
@@ -73,7 +82,14 @@ export function ImageManager({
       setError(`Er passen er nog ${room}. De rest is overgeslagen.`);
     }
 
-    for (const file of chosen) {
+    let savedTotal = 0;
+
+    for (const original of chosen) {
+      // Eerst verkleinen, dan pas versturen. Scheelt wachttijd bij het
+      // uploaden én bij elke bezoeker daarna.
+      const { file, savedBytes } = await shrinkForUpload(original);
+      savedTotal += savedBytes;
+
       const data = new FormData();
       data.set('file', file);
       data.set('folder', folder || 'algemeen');
@@ -98,6 +114,7 @@ export function ImageManager({
     }
 
     setBusy(false);
+    setSaved(savedTotal);
     if (inputRef.current) inputRef.current.value = '';
   }
 
@@ -206,6 +223,17 @@ export function ImageManager({
       {error ? (
         <p role="alert" className="text-sm font-medium text-brand-700">
           {error}
+        </p>
+      ) : null}
+
+      {/*
+        Laten zien wat het scheelde. Niet om op te scheppen: het is de enige
+        manier waarop je merkt dát er iets gebeurt met je foto, en of het
+        gewerkt heeft.
+      */}
+      {saved > 0 ? (
+        <p role="status" className="text-sm text-sand-600">
+          Foto’s verkleind voor de website — dat scheelt {formatSaved(saved)}.
         </p>
       ) : null}
 
