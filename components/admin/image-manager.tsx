@@ -68,6 +68,7 @@ export function ImageManager({
 
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(0);
+  const [formats, setFormats] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
@@ -83,12 +84,14 @@ export function ImageManager({
     }
 
     let savedTotal = 0;
+    const formats = new Set<string>();
 
     for (const original of chosen) {
       // Eerst verkleinen, dan pas versturen. Scheelt wachttijd bij het
       // uploaden én bij elke bezoeker daarna.
-      const { file, savedBytes } = await shrinkForUpload(original);
+      const { file, savedBytes, format } = await shrinkForUpload(original);
       savedTotal += savedBytes;
+      if (format) formats.add(format);
 
       const data = new FormData();
       data.set('file', file);
@@ -115,6 +118,7 @@ export function ImageManager({
 
     setBusy(false);
     setSaved(savedTotal);
+    setFormats([...formats]);
     if (inputRef.current) inputRef.current.value = '';
   }
 
@@ -233,7 +237,14 @@ export function ImageManager({
       */}
       {saved > 0 ? (
         <p role="status" className="text-sm text-sand-600">
-          Foto’s verkleind voor de website — dat scheelt {formatSaved(saved)}.
+          Foto’s verkleind voor de website — dat scheelt {formatSaved(saved)}
+          {formats.length ? ` (opgeslagen als ${formats.join(' en ')})` : ''}.
+          {formats.includes('png') ? (
+            <span className="mt-1 block text-sand-500">
+              Je browser kan geen WebP maken, dus het blijft PNG. In een andere browser
+              worden deze foto’s nog een stuk kleiner.
+            </span>
+          ) : null}
         </p>
       ) : null}
 

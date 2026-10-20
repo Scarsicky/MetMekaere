@@ -33,6 +33,12 @@ export interface ShrinkResult {
   file: File;
   /** Hoeveel er is afgegaan; 0 als het bestand ongemoeid is gelaten. */
   savedBytes: number;
+  /**
+   * Het formaat waarin het is weggeschreven, of `null` als er niets is
+   * gebeurd. Staat hier zodat het beheerscherm het kan laten zien: dat dit de
+   * eerste keer stilletjes PNG werd, viel niemand op.
+   */
+  format: 'webp' | 'jpg' | 'png' | null;
 }
 
 /**
@@ -52,6 +58,57 @@ function encode(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
 }
 
 /**
+ * Heeft deze afbeelding doorzichtige plekken?
+ *
+ * Bepaalt of JPEG een veilige terugval is. Een ontwerp met een vrijstaande
+ * achtergrond wordt als JPEG zwart of wit opgevuld, en dat is een stuk erger
+ * dan een wat groter bestand.
+ *
+ * Bij twijfel 'ja': dan blijft het bij PNG en gaat er hooguit wat winst
+ * verloren.
+ */
+function hasTransparency(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement): boolean {
+  try {
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] < 255) return true;
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Het kleinste bestand dat deze browser kan maken zonder iets kapot te maken.
+ *
+ * Hier zat de fout die de eerste ronde foto's als PNG liet opslaan: ik keek of
+ * `toBlob` iets teruggaf, niet wát het teruggaf. Vraag je om een type dat de
+ * browser niet kan coderen, dan geeft hij volgens de specificatie stilletjes
+ * een PNG terug — geen foutmelding, geen lege waarde. De controle moest dus op
+ * het type van het resultaat, niet op het bestaan ervan.
+ */
+async function encodeSmallest(
+  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
+): Promise<{ blob: Blob; extension: string } | null> {
+  const webp = await encode(canvas, 'image/webp');
+  if (webp?.type === 'image/webp') return { blob: webp, extension: 'webp' };
+
+  // Geen WebP in deze browser. JPEG is veel kleiner dan PNG, maar alleen als
+  // er niets doorzichtigs in zit.
+  if (!hasTransparency(context, canvas)) {
+    const jpeg = await encode(canvas, 'image/jpeg');
+    if (jpeg?.type === 'image/jpeg') return { blob: jpeg, extension: 'jpg' };
+  }
+
+  // Terugval: wat `toBlob` ook teruggaf is in de praktijk een PNG. De foto is
+  // dan nog steeds op maat gebracht, en dat scheelt al het meeste.
+  const png = webp ?? (await encode(canvas, 'image/png'));
+  return png ? { blob: png, extension: 'png' } : null;
+}
+
+/**
  * Geeft een kleinere versie terug, of het oorspronkelijke bestand wanneer
  * verkleinen niet kan of niets oplevert.
  *
@@ -59,7 +116,7 @@ function encode(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
  * twijfel gaat het origineel de deur uit.
  */
 export async function shrinkForUpload(file: File): Promise<ShrinkResult> {
-  const unchanged: ShrinkResult = { file, savedBytes: 0 };
+  const unchanged: ShrinkResult = { file, savedBytes: 0, format: null };
 
   /*
    * Een bewegende GIF overleeft dit niet: tekenen op een canvas levert één
@@ -94,19 +151,18 @@ export async function shrinkForUpload(file: File): Promise<ShrinkResult> {
     context.drawImage(bitmap, 0, 0, width, height);
     bitmap.close();
 
-    // WebP is kleiner en kan doorzichtigheid aan, wat PNG-ontwerpen nodig
-    // hebben. Kan de browser het niet, dan is JPEG de terugval.
-    let blob = await encode(canvas, 'image/webp');
-    let extension = 'webp';
-    if (!blob) {
-      blob = await encode(canvas, 'image/jpeg');
-      extension = 'jpg';
-    }
-    if (!blob || blob.size >= file.size) return unchanged;
+    const encoded = await encodeSmallest(canvas, context);
+    if (!encoded || encoded.blob.size >= file.size) return unchanged;
 
     const base = file.name.replace(/\.[^.]+$/, '') || 'foto';
-    const shrunk = new File([blob], `${base}.${extension}`, { type: blob.type });
-    return { file: shrunk, savedBytes: file.size - shrunk.size };
+    const shrunk = new File([encoded.blob], `${base}.${encoded.extension}`, {
+      type: encoded.blob.type,
+    });
+    return {
+      file: shrunk,
+      savedBytes: file.size - shrunk.size,
+      format: encoded.extension as ShrinkResult['format'],
+    };
   } catch {
     // Geen canvas, geen geheugen, een bestand dat niet te lezen is — wat het
     // ook is, het origineel gaat gewoon de deur uit.
