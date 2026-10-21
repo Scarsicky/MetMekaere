@@ -326,6 +326,12 @@ Vervang nu pas het A-record `199.36.158.100` door het adres dat de wizard geeft,
 en haal het domein weg bij Firebase Hosting. Met een TTL van 300 is dit binnen
 een paar minuten overal zichtbaar.
 
+**Stap 4b: toegestane domeinen bij Firebase.**
+Firebase Authentication laat inloggen alleen toe vanaf domeinen die in zijn
+lijst staan (*Authentication → Settings → Authorized domains*). Zet
+`metmekaere.nl` erbij. Vergeet je dit, dan werkt het beheer op het nieuwe adres
+niet meer — en dat merk je pas als je wilt inloggen.
+
 **Stap 5: de site zelf.**
 Zet `NEXT_PUBLIC_SITE_URL` in `apphosting.yaml` op `https://metmekaere.nl` en rol
 uit. Daar hangen de canonieke links, de sitemap, de terugkeerlink van Mollie, de
