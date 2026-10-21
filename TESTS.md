@@ -34,7 +34,8 @@ Bijgewerkt: 21 oktober 2026.
 - [x] Verzonden → geannuleerd (hier kwam de dubbele bestelbevestiging aan het
       licht; gerepareerd en opnieuw getest)
 - [x] **Opties op een bestelling** — en ze blijven buiten het staffelvoordeel
-      (met één keuzegroep; met twéé groepen ging het mis, hersteld 19 oktober)
+- [x] **Een product met twee keuzegroepen**, van kiezen tot in de
+      bevestigingsmail. Het kiezen ging eerder mis; hersteld 19 oktober.
 - [x] **Uitverkocht terwijl het al in de winkelwagen zit** — met de juiste
       melding
 - [x] **Bestellen en betalen vanaf een telefoon** — met de betaalsimulatie van
@@ -85,10 +86,6 @@ Bijgewerkt: 21 oktober 2026.
 - [ ] **Kortingscodes expres fout laten gaan**: verlopen, maximum bereikt,
       onder het minimumbedrag, en een code die niet bestaat. Alle vier horen
       een begrijpelijke melding te geven.
-- [ ] **Een product met twee keuzegroepen bestellen.** Kiezen werkt weer, maar
-      de hele weg — in de winkelwagen, op de bestelling, in de bevestigingsmail —
-      is met twee groepen nog niet doorlopen.
-
 ### Foto's
 
 - [x] **Worden bij het uploaden verkleind** naar maximaal 1600 punten.
@@ -106,16 +103,25 @@ Bijgewerkt: 21 oktober 2026.
       niet, en dat hoort zo: dat wordt gearchiveerd omdat het in bestellingen
       voorkomt.
 
-### Nieuw en nog niet beproefd
-
 ### Rustig aan
 
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
-- [ ] **De adventskalender.** Deelt de collectie `activities` met de oude app.
-      Een droogloop vóór december is aangenamer dan een verrassing op de eerste.
 - [ ] **De waarschuwingsmail bij te weinig voorraad.** Lastig met opzet uit te
       lokken: er moeten twee mensen tegelijk het laatste exemplaar afrekenen.
       Zou ik laten rusten tot het een keer vanzelf gebeurt.
+
+---
+
+## Niet van toepassing
+
+- **De adventskalender.** Gaat dit jaar niet door; de hoofdschakelaar staat uit
+  (oktober 2026). Hij is daarmee uit het menu en uit de sitemap verdwenen. De
+  pagina zelf blijft bestaan zodat oude links blijven werken — let er dan wel
+  op dat de *tekst buiten het seizoen* bij **Instellingen** klopt, want die
+  belooft standaard dat hij in december terugkomt.
+
+  Wordt dit weer opgepakt, dan hoort er alsnog een droogloop bij: de kalender
+  deelt de collectie `activities` met de oude app.
 
 ---
 
