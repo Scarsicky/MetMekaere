@@ -3,7 +3,7 @@
 Deze lijst gaat over dingen die een mens moet doen. De rekenkern en de losse
 beslisregels hebben hun eigen tests (`npm test`); die staan hier niet in.
 
-Bijgewerkt: 19 oktober 2026.
+Bijgewerkt: 21 oktober 2026.
 
 ---
 
@@ -89,12 +89,24 @@ Bijgewerkt: 19 oktober 2026.
       de hele weg — in de winkelwagen, op de bestelling, in de bevestigingsmail —
       is met twee groepen nog niet doorlopen.
 
-### Nieuw en nog niet beproefd
+### Foto's
 
-- [ ] **Foto's worden bij het uploaden verkleind.** Terug naar maximaal 1600
-      punten en opgeslagen als WebP. Let op de regel die meldt hoeveel het
-      scheelde, en kijk of het beeld scherp genoeg blijft — een ontwerp met
-      dunne lijnen of kleine letters is daarvoor de zwaarste proef.
+- [x] **Worden bij het uploaden verkleind** naar maximaal 1600 punten.
+      Nagemeten op de hele webshop: 46 MB werd 18,7 MB.
+- [x] **Een foto weghalen gaat pas door bij Opslaan.** Wegklikken zonder
+      opslaan laat hem staan — dat ging eerder mis en gaf een kapotte
+      afbeelding op de site.
+- [ ] **Opslaan als WebP.** Safari kon dat niet en sloeg stilletjes PNG op;
+      sinds 21 oktober kiest de code JPEG waar dat veilig is. In een browser
+      die WebP wél kan, zou het nog een stuk kleiner moeten worden. Let op de
+      regel die meldt in welk formaat het is opgeslagen.
+- [ ] **Beeldkwaliteit op 1600 punten.** Een ontwerp met dunne lijnen of
+      kleine letters is de zwaarste proef.
+- [ ] **Een activiteit verwijderen neemt haar foto's mee.** Bij een product
+      niet, en dat hoort zo: dat wordt gearchiveerd omdat het in bestellingen
+      voorkomt.
+
+### Nieuw en nog niet beproefd
 
 ### Rustig aan
 
