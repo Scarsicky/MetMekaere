@@ -87,6 +87,19 @@ nergens.
 *Aanleiding om terug te komen:* bij een update van `firebase-admin`. Controleer
 met `npm audit`.
 
+### Een vastgezette versie van `@grpc/grpc-js`
+
+In `package.json` staat een `overrides` die de browserbibliotheek van Firebase
+dwingt dezelfde `@grpc/grpc-js` te gebruiken als `firebase-admin` al had. Zonder
+die regel bleef daar een versie met een bekend lek hangen.
+
+Bereikbaar was dat lek niet — die code draait alleen in Node en wij gebruiken de
+browserbibliotheek uitsluitend om in te loggen — maar een melding die je elke
+keer moet wegredeneren is er een te veel.
+
+*Aanleiding om terug te komen:* zodra `firebase` zelf een bijgewerkte versie
+meeneemt. Dan kan de override weg.
+
 ### Snelheidsbegrenzer zit in het geheugen van één proces
 
 `lib/rate-limit.ts` telt per draaiend exemplaar. Met `maxInstances: 4` kan

@@ -2,12 +2,9 @@
 
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
-import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
 
 /**
- * Browser-Firebase. Alleen voor twee dingen:
- *  - inloggen van de admin (Firebase Auth);
- *  - live meekijken met de adventskalender (Firestore onSnapshot).
+ * Browser-Firebase. Uitsluitend om de beheerder te laten inloggen.
  *
  * Alles wat met prijzen, voorraad of orders te maken heeft loopt via de server.
  * Deze sleutels zijn publiek; de beveiliging zit in de Firestore-regels.
@@ -57,13 +54,12 @@ export function clientAuth(): Auth {
   return authCache;
 }
 
-let dbCache: Firestore | null = null;
-export function clientDb(): Firestore {
-  if (!dbCache) {
-    dbCache = getFirestore(clientApp());
-    if (useEmulators) {
-      connectFirestoreEmulator(dbCache, '127.0.0.1', 8080);
-    }
-  }
-  return dbCache;
-}
+/*
+ * Hier stond `clientDb()`: Firestore in de browser, bedoeld om live mee te
+ * kijken met de adventskalender. Die functie werd nergens aangeroepen, maar
+ * trok wel de hele Firestore-bibliotheek de browserbundel in — code die
+ * meegeleverd wordt aan elke bezoeker en die niets doet.
+ *
+ * Heeft de site ooit tóch live-meekijken nodig, dan komt hij terug. Tot die
+ * tijd praat de browser alleen met Firebase om in te loggen.
+ */

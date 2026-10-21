@@ -50,6 +50,19 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           // Camera/microfoon heeft deze site nergens nodig.
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          /*
+           * Voortaan alleen nog via https, ook als iemand een oude http-link
+           * aanklikt. Dat scheelt één omleiding waarin een aanvaller op een
+           * openbaar netwerk zou kunnen ingrijpen.
+           *
+           * Twee jaar, inclusief subdomeinen. `preload` staat er bewust niet
+           * bij: daarmee kom je op een lijst die in browsers wordt
+           * meegeleverd, en daar kom je niet makkelijk meer vanaf.
+           */
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains',
+          },
         ],
       },
     ];
