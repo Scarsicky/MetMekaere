@@ -351,6 +351,44 @@ Mocht de wizard weigeren te verifiëren zolang het oude A-record er nog staat, d
 vervalt de omweg en zet je het A-record meteen om. Dankzij stap 0 is het venster
 dan een paar minuten in plaats van vier uur.
 
+### Back-ups van de gegevens
+
+De code staat op GitHub, maar je bestellingen, producten en activiteiten staan
+alleen in Firestore. Dat is je administratie; daar hoort een terugweg bij.
+
+Bekijken wat er staat:
+
+```bash
+firebase firestore:backups:schedules:list --project metmekaere
+firebase firestore:backups:list --project metmekaere
+```
+
+Een schema aanmaken — per database kan er één dagelijks en één wekelijks zijn:
+
+```bash
+firebase firestore:backups:schedules:create --recurrence DAILY --retention 31d --project metmekaere
+firebase firestore:backups:schedules:create --recurrence WEEKLY --day-of-week SUNDAY --retention 14w --project metmekaere
+```
+
+Dagelijks vangt het gewone ongeluk af: iets verkeerd weggegooid, vorige week.
+Wekelijks met een lange bewaartijd vangt het trage ongeluk af — iets dat in
+november stukging en dat je in januari pas merkt. Veertien weken is het
+maximum.
+
+> **Terugzetten overschrijft nooit.** Een herstelactie schrijft de gegevens naar
+> een *nieuwe* database. Je kunt dus veilig terugzetten en gaan kijken; de
+> draaiende site merkt er niets van. Het omzetten naar die herstelde database is
+> daarna een bewuste stap.
+
+Twee dingen die hier níet onder vallen:
+
+- **De foto's in Cloud Storage.** Die zitten niet in een Firestore-back-up. De
+  originelen staan op de computer van wie ze heeft gemaakt; is dat de enige
+  kopie, dan is dat je echte back-up.
+- **De eerste 24 uur.** Een pas aangemaakt schema heeft nog niets gemaakt.
+  Controleer met `backups:list` of er daadwerkelijk een back-up staat — een
+  schema dat bestaat is nog geen back-up die bestaat.
+
 ### 7. De oude adventskalender
 
 Die blijft gewoon bereikbaar op `metmekaere.web.app`. De nieuwe site heeft de

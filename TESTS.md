@@ -116,6 +116,10 @@ Bijgewerkt: 21 oktober 2026.
       binnenkomen kan die manier eruit — en dan is er pas echt overal een
       tweede factor.
 
+- [ ] **Controleren dat er werkelijk een back-up staat.** Er is een dagelijks
+      schema (31 dagen bewaartijd), maar een schema is nog geen back-up. Een
+      dag later nakijken met `firebase firestore:backups:list`.
+
 ### Rustig aan
 
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
