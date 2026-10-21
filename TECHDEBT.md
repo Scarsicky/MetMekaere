@@ -178,6 +178,24 @@ afgewezen (oktober 2026): dat oogt rommeliger dan een foto met wat lucht eromhee
 *Aanleiding om terug te komen:* niet. Dit is bekeken met echte producten erin en
 zo besloten.
 
+### Geen bezoekersstatistieken
+
+Er wordt niets gemeten. Geen Google Analytics, geen cookies van derden, geen
+scripts van buiten. Een Firebase-project krijgt standaard wel een
+Analytics-eigenschap, maar die blijft leeg zolang de site de analytics-module
+niet laadt — en dat doet hij niet.
+
+Afgewogen en zo besloten (oktober 2026). Meten vraagt in Europa om een
+toestemmingsvraag met een echte keuze, een vermelding in de privacyverklaring
+en een verwerkersovereenkomst. Daar staat voor een dorpswebshop weinig tegenover:
+bezoekersaantallen levert de hosting al, vindbaarheid leest Search Console, en
+wat er verkocht wordt staat in de bestellingen zelf. Zonder meting is er ook
+geen cookiebanner nodig, en dat is de rustigste eerste indruk.
+
+*Aanleiding om terug te komen:* als je echt wilt weten wáár mensen in de
+checkout afhaken. Kijk dan eerst naar een partij die zonder cookies werkt en in
+Europa geen toestemming vraagt; pas daarna naar Google Analytics mét banner.
+
 ### Geen offline-modus
 
 De oude adventskalender had een service worker. Op een webshop is dat riskant:

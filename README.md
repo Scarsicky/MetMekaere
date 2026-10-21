@@ -339,6 +339,11 @@ webhook én de links in bestelmails aan.
 
 **Stap 6: na een dag of twee rust de TTL weer omhoog**, bijvoorbeeld naar 3600.
 
+**Stap 7: Search Console.** Voeg `metmekaere.nl` toe aan Google Search Console
+en dien de sitemap in (`/sitemap.xml`). Dat is de enige manier om te zien of
+Google je kaarten vindt, het kost niets en het vraagt geen toestemming van
+bezoekers — anders dan bezoekersstatistieken, zie TECHDEBT.md.
+
 #### Waar je vanaf blijft
 
 - **De MX-records.** Dat is je mail; die staat los van de website.
