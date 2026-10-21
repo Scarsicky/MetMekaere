@@ -132,16 +132,17 @@ export function ImageManager({
     });
   }
 
-  async function remove(index: number) {
-    const image = images[index];
+  function remove(index: number) {
+    /*
+     * Hier werd het bestand meteen uit de opslag gegooid. Klikte je daarna weg
+     * zonder op te slaan, dan wees het product nog naar een foto die niet meer
+     * bestond — een kapotte afbeelding op de site.
+     *
+     * De foto verdwijnt nu alleen uit deze lijst. Bij het opslaan vergelijkt de
+     * server wat er eerst bij hoorde met wat er nu bij hoort, en ruimt het
+     * verschil op. Sla je niet op, dan is er niets gebeurd.
+     */
     setImages((current) => current.filter((_, i) => i !== index));
-
-    // Ook uit de opslag halen, zodat er geen losse bestanden blijven staan.
-    if (image.path) {
-      await fetch(`/api/admin/upload?path=${encodeURIComponent(image.path)}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    }
   }
 
   function setAlt(index: number, alt: string) {

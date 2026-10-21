@@ -2,6 +2,7 @@
 
 import { adminError, adminOk, type AdminActionState } from '@/lib/admin/action-state';
 import { requireAdmin } from '@/lib/admin/auth';
+import { collectImagePaths, deleteUnusedImages } from '@/lib/admin/image-cleanup';
 import {
   revalidateActivities,
   revalidateContent,
@@ -60,9 +61,10 @@ export async function savePageAction(
   const blocks = normalizeBlocks(submitted);
   const dropped = submitted.length - blocks.length;
 
-  await adminDb()
-    .collection('pages')
-    .doc(slug)
+  const pageRef = adminDb().collection('pages').doc(slug);
+  const beforeSave = await pageRef.get();
+
+  await pageRef
     .set(
       {
         slug,
@@ -77,6 +79,10 @@ export async function savePageAction(
       },
       { merge: true },
     );
+
+  // Een blok met een foto van de pagina halen liet die foto achter in de
+  // opslag. Nu gaat hij mee, maar pas nadat het opslaan gelukt is.
+  await deleteUnusedImages(collectImagePaths(beforeSave.data()), collectImagePaths(blocks));
 
   revalidateContent();
 
@@ -141,6 +147,9 @@ export async function saveHappeningAction(
 
   await ref.set(existing.exists ? data : { ...data, createdAt: Date.now() }, { merge: true });
 
+  // Foto's die bij deze bewerking zijn weggehaald, gaan nu pas uit de opslag.
+  await deleteUnusedImages(collectImagePaths(existing.data()), collectImagePaths(data));
+
   revalidateHappenings();
   return existing.exists
     ? adminOk(data.status === 'published' ? 'Opgeslagen en zichtbaar.' : 'Opgeslagen als concept.')
@@ -156,7 +165,17 @@ export async function deleteHappeningAction(
   const id = text(formData, 'id');
   if (!id) return adminError('Onbekende activiteit.');
 
-  await adminDb().collection('happenings').doc(id).delete();
+  /*
+   * Een activiteit wordt écht verwijderd — anders dan een product, dat wordt
+   * gearchiveerd omdat het in bestellingen voorkomt. Haar foto's horen dus
+   * ook weg: er verwijst hierna niets meer naar, en via het beheer zijn ze
+   * niet meer terug te vinden.
+   */
+  const ref = adminDb().collection('happenings').doc(id);
+  const existing = await ref.get();
+  await ref.delete();
+  await deleteUnusedImages(collectImagePaths(existing.data()), []);
+
   revalidateHappenings();
   return adminOk('Activiteit verwijderd.', '/admin/doen-en-beleven');
 }

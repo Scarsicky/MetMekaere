@@ -1,6 +1,7 @@
 'use server';
 
 import { requireAdmin } from '@/lib/admin/auth';
+import { collectImagePaths, deleteUnusedImages } from '@/lib/admin/image-cleanup';
 import { adminError, adminOk, type AdminActionState } from '@/lib/admin/action-state';
 import { revalidateProducts } from '@/lib/admin/revalidate';
 import { getProductById } from '@/lib/data/catalog';
@@ -125,7 +126,11 @@ export async function saveProductAction(
 
   try {
     if (id) {
+      // Wat er vóór deze bewerking bij het product hoorde, zodat verwijderde
+      // foto's hierna uit de opslag kunnen.
+      const previous = await adminDb().collection(COLLECTION).doc(id).get();
       await adminDb().collection(COLLECTION).doc(id).set(data, { merge: true });
+      await deleteUnusedImages(collectImagePaths(previous.data()), collectImagePaths(data));
     } else {
       const newId = slug;
       // Als de slug al als document-id bestaat, plakken we er iets achter.

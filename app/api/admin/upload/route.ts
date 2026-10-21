@@ -109,26 +109,13 @@ export async function POST(request: Request) {
   }
 }
 
-/** Een foto weghalen uit Cloud Storage. */
-export async function DELETE(request: Request) {
-  const admin = await currentAdmin();
-  if (!admin) {
-    return NextResponse.json({ ok: false, error: 'Niet ingelogd.' }, { status: 401 });
-  }
-
-  const { searchParams } = new URL(request.url);
-  const path = searchParams.get('path');
-
-  // Alleen binnen de publieke map, en geen pad dat omhoog probeert te lopen.
-  if (!path || !path.startsWith('public/') || path.includes('..')) {
-    return NextResponse.json({ ok: false, error: 'Ongeldig pad.' }, { status: 400 });
-  }
-
-  try {
-    await adminBucket().file(path).delete({ ignoreNotFound: true });
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error('[upload] verwijderen mislukte:', error);
-    return NextResponse.json({ ok: false, error: 'Verwijderen lukte niet.' }, { status: 500 });
-  }
-}
+/*
+ * Hier stond een DELETE-ingang waarmee de fotobeheerder een bestand meteen
+ * weggooide. Die is vervallen: weggooien hoort bij het opslaan, zodat er niets
+ * verdwijnt van een bewerking die je uiteindelijk niet bewaart. De server
+ * bepaalt nu zelf wat er weg mag door de oude en de nieuwe toestand te
+ * vergelijken -- zie lib/admin/image-cleanup.ts.
+ *
+ * Een losse ingang die op verzoek een bestand wist, zonder dat iemand kijkt of
+ * het nog in gebruik is, hoort hier dan niet meer te staan.
+ */
