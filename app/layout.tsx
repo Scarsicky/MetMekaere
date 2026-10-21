@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Nunito_Sans, Raleway } from 'next/font/google';
 
-import { isTemporaryDomain, siteUrl } from '@/lib/seo';
+import { getGeneralSettings } from '@/lib/data/settings';
+import { isTemporaryDomain, siteTitle, siteUrl } from '@/lib/seo';
 
 import './globals.css';
 
@@ -29,27 +30,37 @@ const nunito = Nunito_Sans({
   weight: ['400', '600', '700'],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl()),
-  title: {
-    default: 'Met Mekaere · Veur wat meer aandacht veur mekaere',
-    template: '%s · Met Mekaere',
-  },
-  description:
-    'Kaarten om te sturen, aandacht voor ons dialect en activiteiten waar je mensen tegenkomt die je anders misschien nooit had gesproken.',
-  applicationName: 'Met Mekaere',
-  formatDetection: { telephone: false },
-  // Op een tijdelijk adres ook een meta-tag, niet alleen robots.txt: dat laatste
-  // is een verzoek, dit is een instructie die zoekmachines wel opvolgen.
-  robots: isTemporaryDomain() ? { index: false, follow: false } : undefined,
-  icons: {
-    icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: '/icons/icon-192.png',
-  },
-};
+/**
+ * De metagegevens komen uit de instellingen, niet uit de code.
+ *
+ * Dit was een vaste tekst, waardoor de naam en de slogan die je in het beheer
+ * invult nergens in de tabtitel terechtkwamen.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const general = await getGeneralSettings();
+
+  return {
+    metadataBase: new URL(siteUrl()),
+    title: {
+      default: siteTitle(general),
+      template: `%s · ${general.siteName}`,
+    },
+    description: general.description,
+    applicationName: general.siteName,
+    formatDetection: { telephone: false },
+    // Op een tijdelijk adres ook een meta-tag, niet alleen robots.txt: dat
+    // laatste is een verzoek, dit is een instructie die zoekmachines wel
+    // opvolgen.
+    robots: isTemporaryDomain() ? { index: false, follow: false } : undefined,
+    icons: {
+      icon: [
+        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: '/icons/icon-192.png',
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#fbf8f3',

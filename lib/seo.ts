@@ -95,6 +95,18 @@ export function buildMetadata(args: {
   };
 }
 
+/**
+ * De titel van de site zelf: de naam met de slogan erachter.
+ *
+ * Staat hier zodat de hoofdlayout en de homepage dezelfde zin opbouwen. Die
+ * twee liepen uit elkaar doordat ze allebei hun eigen vaste tekst hadden, en
+ * de slogan uit de instellingen nergens werd gebruikt.
+ */
+export function siteTitle(general: { siteName: string; tagline?: string }): string {
+  const tagline = general.tagline?.trim();
+  return tagline ? `${general.siteName} · ${tagline}` : general.siteName;
+}
+
 /* ------------------------------------------------------------------ *
  * Gestructureerde gegevens (JSON-LD)
  * ------------------------------------------------------------------ */

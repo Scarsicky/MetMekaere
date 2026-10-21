@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { buildMetadata, isTemporaryDomain, siteUrl } from '@/lib/seo';
+import { buildMetadata, isTemporaryDomain, siteTitle, siteUrl } from '@/lib/seo';
 
 /**
  * Zolang de site op een tijdelijk adres draait, mag hij niet in Google komen.
@@ -76,5 +76,24 @@ describe('noindex op een tijdelijk adres', () => {
     on('https://metmekaere.nl/');
     expect(siteUrl()).toBe('https://metmekaere.nl');
     expect(buildMetadata(page).alternates?.canonical).toBe('https://metmekaere.nl/product/kaart');
+  });
+});
+
+/**
+ * De titel van de site kwam uit de code in plaats van uit de instellingen,
+ * waardoor een aangepaste slogan nergens in de tabtitel terechtkwam.
+ */
+describe('de titel van de site', () => {
+  it('zet de slogan achter de naam', () => {
+    expect(siteTitle({ siteName: 'Met Mekaere', tagline: 'Samen verbinden' })).toBe(
+      'Met Mekaere · Samen verbinden',
+    );
+  });
+
+  it('laat het scheidingsteken weg zonder slogan', () => {
+    // Anders staat er 'Met Mekaere · ' met een losse punt achteraan.
+    expect(siteTitle({ siteName: 'Met Mekaere' })).toBe('Met Mekaere');
+    expect(siteTitle({ siteName: 'Met Mekaere', tagline: '' })).toBe('Met Mekaere');
+    expect(siteTitle({ siteName: 'Met Mekaere', tagline: '   ' })).toBe('Met Mekaere');
   });
 });
