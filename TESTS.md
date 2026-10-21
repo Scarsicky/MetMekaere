@@ -103,6 +103,17 @@ Bijgewerkt: 21 oktober 2026.
       niet, en dat hoort zo: dat wordt gearchiveerd omdat het in bestellingen
       voorkomt.
 
+### Beveiliging
+
+- [x] **Firestore-regels worden afgedwongen.** Van buitenaf geprobeerd te lezen
+      uit `orders`, `newsletter`, `products`, `admins`, `carts` en
+      `discountCodes` — alle zes geweigerd. Alleen `activities` is leesbaar, en
+      dat hoort zo.
+- [ ] **Inloggen met Google.** Staat sinds 21 oktober op het inlogscherm.
+      Controleer dat je bestaande beheerrechten behouden blijven; dat zou moeten
+      omdat het om hetzelfde e-mailadres gaat. Laat wachtwoord-inloggen aan
+      staan tot dit voor iedereen werkt.
+
 ### Rustig aan
 
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
