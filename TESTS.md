@@ -109,10 +109,12 @@ Bijgewerkt: 21 oktober 2026.
       uit `orders`, `newsletter`, `products`, `admins`, `carts` en
       `discountCodes` — alle zes geweigerd. Alleen `activities` is leesbaar, en
       dat hoort zo.
-- [ ] **Inloggen met Google.** Staat sinds 21 oktober op het inlogscherm.
-      Controleer dat je bestaande beheerrechten behouden blijven; dat zou moeten
-      omdat het om hetzelfde e-mailadres gaat. Laat wachtwoord-inloggen aan
-      staan tot dit voor iedereen werkt.
+- [x] **Inloggen met Google**, met behoud van de bestaande beheerrechten — het
+      ging om hetzelfde e-mailadres, dus Google werd aan dat account gekoppeld.
+- [ ] **Het tweede beheeraccount via Google.** Zolang dat niet werkt, blijft
+      inloggen met een wachtwoord nodig. Pas als beide accounts via Google
+      binnenkomen kan die manier eruit — en dan is er pas echt overal een
+      tweede factor.
 
 ### Rustig aan
 
