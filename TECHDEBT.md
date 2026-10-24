@@ -110,6 +110,44 @@ met veel blokken de standaardlimiet van 1 MB kan naderen bij het opslaan.
 *Aanleiding om terug te komen:* als die instelling stabiel wordt, of als het
 opslaan van een pagina ooit stilletjes faalt.
 
+### Een mislukte betaalstart laat een order achter
+
+Afrekenen gaat in deze volgorde: eerst alles controleren, dan een ordernummer
+uitgeven en de order wegschrijven, en dán de betaling bij Mollie aanvragen.
+Struikelt die laatste stap — zoals op 24 oktober, toen Mollie het profiel nog
+niet had vrijgegeven — dan blijft de order staan op *Wacht op betaling*.
+Probeert de klant het daarna nog twee keer, dan staan er drie orders met drie
+nummers voor één bestelling.
+
+Zo'n order komt ook nooit meer uit die stand. Alle andere pendings lossen
+zichzelf op: Mollie laat een openstaande betaling na een kwartier verlopen en
+meldt dat via de webhook. Maar bij een mislukte start is er nooit een betaling
+aan de order gehangen (`molliePaymentId` blijft `null`), en zonder betaling
+komt er ook nooit bericht van Mollie. Niets haalt hem dus nog weg.
+
+Datzelfde kenmerk is de aanknoping voor een oplossing. Van klein naar echt:
+
+1. **Meteen eerlijk zijn.** De order bij een mislukte start afsluiten in plaats
+   van hem op betaling laten wachten — op *geannuleerd*, of op een eigen stand
+   als je dit verschil wil kunnen zien. Dan klopt het overzicht, maar de
+   dubbele nummers blijven.
+2. **De open order hergebruiken.** Bij een nieuwe poging met dezelfde
+   winkelwagen de bestaande order overschrijven in plaats van een nieuwe te
+   maken; de winkelwagen hangt al aan de order. Voorwaarde: alleen als die
+   order nog op *pending* staat én er geen betaling aan hangt, want een order
+   met een betaling mag je nooit overschrijven. Dit haalt zowel de dubbele
+   orders als de gaten in de nummering weg.
+3. **Opruimen in het beheer.** Een filter op *wacht op betaling, zonder
+   betaling* en die in één keer kunnen afsluiten, voor wat er al staat.
+
+Wat er nu staat is met de hand weg te werken: open de order, annuleer hem en
+haal het vinkje *De klant een mailtje sturen* weg.
+
+*Aanleiding om terug te komen:* zodra een échte klant hier tegenaan loopt, of
+eerder als je het overzicht niet meer vertrouwt. Punt 1 is een handvol regels
+in `app/actions/checkout.ts`; punt 2 hoort in `createPendingOrder` in
+`lib/shop/orders.ts`.
+
 ### Geen geautomatiseerde test van het bestelproces
 
 De rekenkern en de losse beslisregels hebben tests (72 stuks), maar het pad
@@ -123,6 +161,7 @@ opgevallen.
 
 *Aanleiding om terug te komen:* voordat je iets wezenlijks aan de checkout of
 aan de orderafhandeling verandert.
+
 ---
 
 ## Bewuste keuzes
