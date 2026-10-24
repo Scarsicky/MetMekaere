@@ -50,6 +50,22 @@ Wat nog loopt:
   moment op concept en is daardoor nergens op de site te vinden — zet hem op
   gepubliceerd zodra de woorden erin staan.
 
+- Een eigen **favicon**. Het pictogram in het tabblad is nog dat van Next.js:
+  een zwart rondje met een witte driehoek. Het zit in `app/favicon.ico` — in de
+  broncode dus, niet ergens in een instelling. Voor de telefoon staat het eigen
+  logo er wél goed in (`public/icons/`), dus het gaat om dit ene bestand.
+
+  De vangst zit in het ontwerp, niet in het vervangen. Een favicon wordt op 16
+  bij 16 punten getoond, en de krans met *MET MEKAERE · SAMEN VERBINDEN* is dan
+  een vlekje. Er is een vereenvoudigd merkteken nodig dat op die maat nog iets
+  betekent: de geschreven *Met*, een losse tak, of één letter. Maak hem dan
+  meteen groot genoeg mee (256 punten) voor bladwijzers en de zoekresultaten
+  van Google.
+
+  Daarna is het één bestand overschrijven. Een `.svg` kan ook — die blijft op
+  elke maat scherp — maar dan heet hij `app/icon.svg` en moet `favicon.ico`
+  weg, anders zet Next ze allebei in de pagina.
+
 > De algemene voorwaarden en de privacyverklaring in
 > `lib/cms/default-content.ts` zijn een werkbare opzet, geen juridisch advies.
 > Dat blijft zo, ook nu ze zijn nagelezen.
