@@ -120,6 +120,17 @@ Bijgewerkt: 21 oktober 2026.
       schema (31 dagen bewaartijd), maar een schema is nog geen back-up. Een
       dag later nakijken met `firebase firestore:backups:list`.
 
+### Na de livegang (24 oktober 2026, van buitenaf nagemeten)
+
+- [x] Alle 33 adressen uit de sitemap geven een 200
+- [x] `http` verwijst door naar `https`, `www` en `metmekaere.web.app` naar het
+      hoofdadres
+- [x] Certificaat van Google Trust Services, geldig tot 22 januari 2027
+- [x] Alle vijf beveiligingsheaders aanwezig, inclusief HSTS
+- [x] Een pagina op concept en een onbekend adres geven allebei een 404
+- [x] Het beheer stuurt door naar het inlogscherm en staat op noindex
+- [x] Firestore blijft van buitenaf dicht
+
 ### Rustig aan
 
 - [ ] De vijf andere secties op een telefoon, plus een niet-bestaande URL
