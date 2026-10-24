@@ -4,7 +4,8 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "redirects": [
       {
-        "source": "**",
+        "_comment": "Alles verwijst naar metmekaere.nl, behalve /sw.js. Dat bestand ruimt de service worker van de oude adventskalender op, en een service worker die met een doorverwijzing antwoordt telt voor de browser als mislukt - dan blijft de oude dus eeuwig staan. Doorverwijzingen gaan bij Firebase vóór op echte bestanden, vandaar deze uitdrukking in plaats van een eenvoudige **. Ze zegt: elk pad, behalve precies /sw.js. Vooruitkijken kan niet in RE2, vandaar de opsomming.",
+        "regex": "^/(|[^s].*|s|s[^w].*|sw|sw[^.].*|sw\\.|sw\\.[^j].*|sw\\.j|sw\\.j[^s].*|sw\\.js.+)$",
         "destination": "https://metmekaere.nl/",
         "type": 301
       }
