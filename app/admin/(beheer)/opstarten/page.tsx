@@ -22,7 +22,7 @@ const CONTENT_LABELS: Record<string, string> = {
 
 export default async function AdminSetupPage() {
   const [counts, general] = await Promise.all([countExistingContent(), getGeneralSettings()]);
-  const checks = runHealthChecks();
+  const checks = await runHealthChecks();
   const todo = countTodo(checks);
 
   const contentTotal = Object.keys(CONTENT_LABELS).reduce(

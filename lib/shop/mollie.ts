@@ -48,6 +48,37 @@ export function useSimulatedPayments(): boolean {
   return !isMollieConfigured() && process.env.NODE_ENV !== 'production';
 }
 
+export type MollieConnection =
+  | { ok: true; methods: string[] }
+  | { ok: false; message: string };
+
+/**
+ * Werkt de sleutel, en staan er betaalmethoden klaar?
+ *
+ * Dat de sleutel *bestaat* zei tot nu toe alles wat het beheerscherm wist. Dat
+ * is te weinig gebleken: een live-sleutel van een account dat nog niet is
+ * goedgekeurd ziet er precies hetzelfde uit, en de klant krijgt dan bij het
+ * afrekenen een melding terwijl er nergens iets roods staat.
+ *
+ * Mollie geeft in live-modus alleen methoden terug die op het account zijn
+ * geactiveerd én in het dashboard aanstaan. Een lege lijst is dus geen
+ * storing maar een antwoord: er is nog niets om mee te betalen.
+ */
+export async function checkMollieConnection(): Promise<MollieConnection> {
+  if (!isMollieConfigured()) {
+    return { ok: false, message: 'Er is geen sleutel ingesteld.' };
+  }
+
+  try {
+    const methods = await client().methods.list();
+    return { ok: true, methods: methods.map((m) => m.description || m.id) };
+  } catch (error) {
+    // De melding van Mollie zelf is hier het hele punt; die willen we tonen.
+    const message = error instanceof Error ? error.message : String(error);
+    return { ok: false, message };
+  }
+}
+
 function client(): MollieClient {
   const key = apiKey();
   if (!key) throw new Error('MOLLIE_API_KEY ontbreekt.');

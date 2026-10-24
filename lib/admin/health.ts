@@ -2,7 +2,7 @@ import 'server-only';
 
 import { isMailConfigured } from '@/lib/mail';
 import { configuredProviderLabel, isProviderConfigured } from '@/lib/newsletter/providers';
-import { isMollieConfigured, isMollieTestMode } from '@/lib/shop/mollie';
+import { checkMollieConnection, isMollieConfigured, isMollieTestMode } from '@/lib/shop/mollie';
 import { isTemporaryDomain, siteUrl } from '@/lib/seo';
 
 /**
@@ -23,7 +23,7 @@ export interface HealthCheck {
   action?: string;
 }
 
-export function runHealthChecks(): HealthCheck[] {
+export async function runHealthChecks(): Promise<HealthCheck[]> {
   const checks: HealthCheck[] = [];
   const live = !isTemporaryDomain();
 
@@ -51,12 +51,43 @@ export function runHealthChecks(): HealthCheck[] {
         : 'Vervang de test-sleutel door de live-sleutel zodra je opengaat.',
     });
   } else {
-    checks.push({
-      id: 'mollie',
-      label: 'Betalen met iDEAL',
-      status: 'ok',
-      detail: 'Mollie is aangesloten en staat live.',
-    });
+    /*
+     * Hier stond alleen 'Mollie is aangesloten en staat live', puur omdat er
+     * een sleutel was. Dat bleek te weinig: een live-sleutel van een account
+     * dat nog niet is goedgekeurd ziet er precies zo uit, en dan loopt de
+     * klant bij het afrekenen vast terwijl dit scherm groen blijft.
+     *
+     * We vragen het nu aan Mollie zelf.
+     */
+    const connection = await checkMollieConnection();
+
+    if (!connection.ok) {
+      checks.push({
+        id: 'mollie',
+        label: 'Betalen met iDEAL',
+        status: 'todo',
+        detail: `Mollie weigert de verbinding: ${connection.message}`,
+        action:
+          'Controleer in je Mollie-dashboard of het account volledig is goedgekeurd en of de sleutel nog klopt.',
+      });
+    } else if (connection.methods.length === 0) {
+      checks.push({
+        id: 'mollie',
+        label: 'Betalen met iDEAL',
+        status: 'todo',
+        detail:
+          'De sleutel werkt, maar er staat geen enkele betaalmethode klaar. Afrekenen mislukt dan met een melding aan de klant.',
+        action:
+          'Zet in je Mollie-dashboard de gewenste methoden aan. In live-modus moet je account daarvoor eerst zijn goedgekeurd.',
+      });
+    } else {
+      checks.push({
+        id: 'mollie',
+        label: 'Betalen met iDEAL',
+        status: 'ok',
+        detail: `Mollie staat live en klaar: ${connection.methods.join(', ')}.`,
+      });
+    }
   }
 
   /* E-mail */

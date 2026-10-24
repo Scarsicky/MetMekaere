@@ -24,7 +24,7 @@ export const ORDER_STATUS_LABELS: Record<Order['status'], { label: string; tone:
 
 export default async function AdminDashboard() {
   const [orders, products] = await Promise.all([listOrders(200), getAllProductsForAdmin()]);
-  const checks = runHealthChecks();
+  const checks = await runHealthChecks();
   const todo = countTodo(checks);
 
   const toShip = orders.filter((o) => o.status === 'paid');
