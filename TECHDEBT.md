@@ -12,34 +12,15 @@ actie en ze verouderen verschillend.
 
 ## Vóór de opening
 
-### Mollie: testsleutel vervangen door de live-sleutel
-
-Nu staat er een `test_`-sleutel. Bestellingen lopen wel door het hele proces
-maar er wordt geen geld afgeschreven.
-
-```bash
-firebase apphosting:secrets:set mollie-api-key
-firebase apphosting:rollouts:create metmekaere-web -b site
-```
-
-> **Dit punt bewaakt zichzelf.** Het beheerscherm *Opstarten* controleert dit bij
-> elke keer dat je het opent. Zolang de site op een tijdelijk adres draait is het
-> een oranje melding; zodra hij op het eigen domein staat wordt het een rode,
-> want dan kunnen bezoekers bestellen zonder te betalen. Je hoeft dus niet op
-> deze lijst te vertrouwen.
-
-### Webadres omzetten naar het eigen domein
-
-In `apphosting.yaml` staat `NEXT_PUBLIC_SITE_URL` nu op het tijdelijke
-App Hosting-adres. Daar hangt meer aan dan alleen de canonieke links: het is ook
-het adres waar Mollie de klant na het betalen naartoe stuurt, waar de webhook
-binnenkomt, en waar de links in bestelmails heen wijzen.
-
-Zet hem bij de overstap op `https://metmekaere.nl` en rol opnieuw uit.
-
-> Ook dit bewaakt zichzelf: zolang er een tijdelijk adres staat, vraagt de site
-> zoekmachines om hem met rust te laten én meldt het beheerscherm *Opstarten*
-> dat het adres nog niet definitief is.
+> **De verhuizing is gedaan (24 oktober 2026).** Het domein staat op
+> `metmekaere.nl` met een eigen certificaat, `NEXT_PUBLIC_SITE_URL` is
+> omgezet — waarmee robots.txt en de noindex vanzelf uitschakelden — en de
+> Mollie-sleutel is vervangen door een `live_`-sleutel. Die laatste is actief
+> sinds de uitrol die erop volgde; een nieuw geheim wordt namelijk pas bij een
+> uitrol opgepikt.
+>
+> Vertrouw voor de actuele stand niet op dit bestand maar op het beheerscherm
+> *Opstarten*. Dat kijkt bij elke keer openen naar de werkelijke instellingen.
 
 ### Nieuwsbrief: twee dingen buiten de code
 

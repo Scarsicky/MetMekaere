@@ -408,14 +408,15 @@ Twee lijsten, elk met een ander doel:
 - [TECHDEBT.md](TECHDEBT.md) — techniek-schuld en bewuste keuzes, met per punt
   de aanleiding om erop terug te komen.
 
-Wat er op dit moment écht nog moet gebeuren voordat de shop opengaat:
+De verhuizing naar `metmekaere.nl` is gedaan op 24 oktober 2026, inclusief de
+live-sleutel van Mollie. Wat er daarna nog lag:
 
-- **De Mollie-sleutel** staat nog op `test_`. Er wordt dus geen geld
-  afgeschreven. Het beheerscherm *Opstarten* bewaakt dit zelf.
-- **Het webadres** staat nog op het tijdelijke App Hosting-adres. Daar hangen de
-  terugkeerlink van Mollie, de webhook en de links in bestelmails aan.
 - **Het dialect-woordenboek** is nog niet gevuld; die pagina staat daarom op
   concept en is nergens op de site te vinden.
+
+> Lees de stand van zaken niet uit dit bestand maar uit het beheerscherm
+> *Opstarten*. Dat controleert de werkelijke instellingen bij elke keer dat je
+> het opent — een geschreven lijst veroudert, een controle niet.
 
 ---
 
