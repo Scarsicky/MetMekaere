@@ -1,31 +1,31 @@
 'use client';
 
-import {
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  type User,
-} from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, type User } from 'firebase/auth';
 import Image from 'next/image';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Field, Input } from '@/components/ui/field';
 import { clientAuth, isClientFirebaseConfigured } from '@/lib/firebase/client';
 
 /**
- * Inloggen op de admin.
+ * Inloggen op de admin — uitsluitend met Google.
  *
  * Firebase doet het inloggen in de browser; het token dat daaruit komt gaat
  * één keer naar de server, die er een sessiecookie van maakt. Daarna zit er
  * geen token meer in de browser.
+ *
+ * Inloggen met e-mailadres en wachtwoord is eruit (oktober 2026). Zolang dat
+ * ernaast stond, was een wachtwoord nog steeds genoeg om binnen te komen en
+ * leverde de tweede factor van Google dus niets op. Beide beheerders komen nu
+ * via Google binnen.
+ *
+ * Raakt dat ooit onbruikbaar, dan is het wachtwoordformulier terug te halen
+ * uit de geschiedenis van dit bestand — en kan er via de Firebase-console
+ * altijd nog een beheerder worden toegelaten.
  */
 export function LoginForm({ next, notice }: { next: string; notice?: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const emailId = useId();
-  const passwordId = useId();
 
   const configured = isClientFirebaseConfigured();
 
@@ -71,33 +71,6 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
     window.location.assign(next);
   }
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setBusy(true);
-
-    const data = new FormData(event.currentTarget);
-    const email = String(data.get('email') ?? '');
-    const password = String(data.get('password') ?? '');
-
-    try {
-      const credential = await signInWithEmailAndPassword(clientAuth(), email, password);
-      await completeSignIn(credential.user);
-    } catch (caught) {
-      const code = (caught as { code?: string }).code ?? '';
-      setError(
-        code === 'auth/invalid-credential' ||
-          code === 'auth/wrong-password' ||
-          code === 'auth/user-not-found'
-          ? 'E-mailadres of wachtwoord klopt niet.'
-          : code === 'auth/too-many-requests'
-            ? 'Te veel pogingen. Wacht even en probeer het opnieuw.'
-            : 'Inloggen is niet gelukt. Probeer het nog eens.',
-      );
-      setBusy(false);
-    }
-  }
-
   async function onGoogle() {
     setError(null);
     setBusy(true);
@@ -118,7 +91,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
         code === 'auth/popup-blocked'
           ? 'Je browser blokkeerde het inlogvenster. Sta vensters van deze site toe en probeer het nog eens.'
           : code === 'auth/account-exists-with-different-credential'
-            ? 'Dit e-mailadres hoort al bij een andere manier van inloggen. Log in met je wachtwoord.'
+            ? 'Dit e-mailadres hoort bij een andere manier van inloggen, en die is uitgezet. Vraag of je Google-account beheerrechten krijgt.'
             : code === 'auth/unauthorized-domain'
               ? 'Dit webadres staat niet in de lijst met toegestane domeinen in Firebase.'
               : 'Inloggen met Google is niet gelukt. Probeer het nog eens.',
@@ -158,10 +131,6 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
             </p>
           ) : null}
 
-          {/*
-            Google staat bovenaan: dat is de manier met een tweede factor erop,
-            en daar willen we dat mensen naar grijpen.
-          */}
           <Button
             type="button"
             onClick={onGoogle}
@@ -189,47 +158,14 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
                 d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
               />
             </svg>
-            Inloggen met Google
+            {busy ? 'Even geduld…' : 'Inloggen met Google'}
           </Button>
-
-          <div className="my-6 flex items-center gap-3 text-sm text-sand-500">
-            <span className="h-px flex-1 bg-sand-300" />
-            of met een wachtwoord
-            <span className="h-px flex-1 bg-sand-300" />
-          </div>
-
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <Field label="E-mailadres" htmlFor={emailId} required>
-            <Input
-              id={emailId}
-              name="email"
-              type="email"
-              autoComplete="username"
-              required
-              autoFocus
-            />
-          </Field>
-
-          <Field label="Wachtwoord" htmlFor={passwordId} required>
-            <Input
-              id={passwordId}
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-            />
-          </Field>
-
-          <Button type="submit" size="lg" fullWidth disabled={busy}>
-            {busy ? 'Even geduld…' : 'Inloggen'}
-          </Button>
-        </form>
         </>
       )}
 
       <p className="mt-8 text-center text-sm text-sand-600">
-        Nog geen toegang? Vraag of je account beheerrechten krijgt met{' '}
-        <code className="rounded bg-sand-200 px-1.5 py-0.5">npm run admin:grant</code>.
+        Inloggen met een wachtwoord is uitgezet. Alleen de Google-accounts die
+        beheerrechten hebben komen hier binnen.
       </p>
     </div>
   );
