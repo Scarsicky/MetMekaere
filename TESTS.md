@@ -3,7 +3,7 @@
 Deze lijst gaat over dingen die een mens moet doen. De rekenkern en de losse
 beslisregels hebben hun eigen tests (`npm test`); die staan hier niet in.
 
-Bijgewerkt: 21 oktober 2026.
+Bijgewerkt: 24 oktober 2026 — de site staat live op metmekaere.nl.
 
 ---
 
@@ -81,9 +81,11 @@ Bijgewerkt: 21 oktober 2026.
 
 ### Belangrijk voor de opening
 
-- [ ] **Afrekenen met de échte iDEAL-app op een telefoon.** Kan pas na het
-      omzetten naar de live-sleutel. Het wisselen naar de bankapp en weer terug
-      is het enige stuk dat de simulatie niet nabootst.
+- [x] **Een echte betaling met de live-sleutel** (24 oktober 2026). De betaling
+      kwam door en de bestelling stond goed in het overzicht.
+- [ ] Datzelfde nog eens vanaf een telefoon, met de iDEAL-app erbij. Het
+      wisselen naar de bankapp en weer terug is het enige stuk dat nergens
+      anders uit blijkt.
 ### Foto's
 
 - [x] **Worden bij het uploaden verkleind** naar maximaal 1600 punten.
@@ -128,6 +130,11 @@ Bijgewerkt: 21 oktober 2026.
 - [x] Een pagina op concept en een onbekend adres geven allebei een 404
 - [x] Het beheer stuurt door naar het inlogscherm en staat op noindex
 - [x] Firestore blijft van buitenaf dicht
+
+- [x] **De service worker van de oude adventskalender.** Die gaf witte
+      schermen bij bezoekers die de kalender ooit openden. Bevestigd met twee
+      registraties in een echte browser, opgeruimd op beide adressen, en daarna
+      laadde alles in één keer goed.
 
 ### Rustig aan
 
