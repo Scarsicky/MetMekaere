@@ -44,7 +44,8 @@ Bijgewerkt: 21 oktober 2026.
 
 ### Prijzen en verzending
 
-- [x] Kortingscodes
+- [x] Kortingscodes, ook de gevallen die fout moeten gaan: verlopen, maximum
+      bereikt, onder het minimumbedrag, en een code die niet bestaat
 - [x] Staffelvoordeel, ook opgeteld over verschillende producten heen
 - [x] Verzendmethodes en -kosten op de echte tarieven, inclusief gewichtsgrenzen
 
@@ -83,9 +84,6 @@ Bijgewerkt: 21 oktober 2026.
 - [ ] **Afrekenen met de échte iDEAL-app op een telefoon.** Kan pas na het
       omzetten naar de live-sleutel. Het wisselen naar de bankapp en weer terug
       is het enige stuk dat de simulatie niet nabootst.
-- [ ] **Kortingscodes expres fout laten gaan**: verlopen, maximum bereikt,
-      onder het minimumbedrag, en een code die niet bestaat. Alle vier horen
-      een begrijpelijke melding te geven.
 ### Foto's
 
 - [x] **Worden bij het uploaden verkleind** naar maximaal 1600 punten.
