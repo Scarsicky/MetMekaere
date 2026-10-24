@@ -15,6 +15,13 @@
 #   firebase apphosting:secrets:set smtp-password
 #   firebase apphosting:secrets:set laposta-api-key
 #
+# Een nieuw geheim wordt pas opgepikt bij de eerstvolgende uitrol, ongeacht
+# waarom die plaatsvindt. Wil je weten of dat al gebeurd is, vergelijk dan de
+# tijd van het geheim met die van de uitrol — maar let op de tijdzone: de
+# firebase-CLI toont UTC (te herkennen aan de Z), en in Nederland is dat een
+# of twee uur vroeger dan de klok op je scherm. Dat verschil heeft hier al
+# eens tot de verkeerde conclusie geleid.
+#
 # Een geheim aanmaken is niet genoeg: de backend moet er ook bij mógen. Dat
 # gaat meestal vanzelf, maar niet altijd — bij de Laposta-sleutel ging het mis.
 # De uitrol wordt dan geweigerd met 'Misconfigured secret', en dat is stil: de
