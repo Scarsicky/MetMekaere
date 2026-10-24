@@ -41,13 +41,10 @@ env:
   # links in bestelmails.
   #
   # Staat hier een tijdelijk adres, dan vraagt de site zoekmachines om hem met
-  # rust te laten. Dat schakelt zichzelf uit zodra hier het eigen domein staat.
-  #
-  # ⚠️ BIJ DE OVERSTAP NAAR HET EIGEN DOMEIN: zet dit op https://metmekaere.nl
-  #    en rol opnieuw uit. Vergeet je dat, dan stuurt Mollie klanten na het
-  #    betalen naar het verkeerde adres.
+  # rust te laten. Dat schakelde zichzelf uit toen hier het eigen domein kwam
+  # te staan (24 oktober 2026) — vanaf dat moment mag de site in Google.
   - variable: NEXT_PUBLIC_SITE_URL
-    value: https://metmekaere-web--metmekaere.europe-west4.hosted.app
+    value: https://metmekaere.nl
     availability:
       - BUILD
       - RUNTIME
