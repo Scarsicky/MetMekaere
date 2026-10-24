@@ -1,4 +1,16 @@
 {
+  "hosting": {
+    "public": "hosting-oud",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://metmekaere.nl/",
+        "type": 301
+      }
+    ]
+  },
+
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
