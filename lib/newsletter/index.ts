@@ -112,6 +112,23 @@ async function applyProviderResult(
   }
 }
 
+/**
+ * Moet dit adres alsnog naar de mailinglijst?
+ *
+ * Drie gevallen, en de derde is er eentje die we bijna hadden gemist. Een
+ * adres kan een id van de mailinglijst hebben én toch zijn blijven steken:
+ * iemand die zich eerder met goed gevolg inschreef en dat later nog eens doet,
+ * krijgt bij die tweede poging weer de stand 'in afwachting', terwijl het id
+ * van de eerste keer blijft staan. Alleen op het ontbreken van dat id afgaan
+ * laat zo'n adres dus onzichtbaar achter — mét foutmelding en al.
+ *
+ * Wie zich heeft uitgeschreven blijft buiten beeld: die hoort nergens heen.
+ */
+export function needsSync(subscriber: NewsletterSubscriber): boolean {
+  if (subscriber.status === 'unsubscribed') return false;
+  return !subscriber.providerId || Boolean(subscriber.syncError) || subscriber.status === 'pending';
+}
+
 export interface ResyncReport {
   attempted: number;
   synced: number;
@@ -132,7 +149,7 @@ export interface ResyncReport {
  */
 export async function resyncUnsynced(limit = 50): Promise<ResyncReport> {
   const all = await listSubscribers();
-  const todo = all.filter((s) => s.status !== 'unsubscribed' && !s.providerId).slice(0, limit);
+  const todo = all.filter(needsSync).slice(0, limit);
 
   const report: ResyncReport = { attempted: todo.length, synced: 0, failed: 0, firstError: null };
 

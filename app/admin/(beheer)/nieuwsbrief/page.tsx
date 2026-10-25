@@ -1,6 +1,6 @@
 import { ResyncButton } from '@/app/admin/(beheer)/nieuwsbrief/resync-button';
 import { AdminCard, AdminEmpty, AdminPage, StatTile, StatusPill } from '@/components/admin/ui';
-import { listSubscribers } from '@/lib/newsletter';
+import { listSubscribers, needsSync } from '@/lib/newsletter';
 import { configuredProviderLabel, isProviderConfigured } from '@/lib/newsletter/providers';
 import { formatDateNL } from '@/lib/utils';
 
@@ -28,6 +28,14 @@ export default async function AdminNewsletterPage() {
    */
   const notForwarded = subscribers.filter((s) => s.status !== 'unsubscribed' && !s.providerId);
 
+  /*
+   * Wat er nog opgelost moet worden is iets ruimer dan 'staat er niet in'.
+   * Een adres kan er wél in staan en tóch zijn blijven hangen — zie
+   * `needsSync`. Alleen op de teller hierboven afgaan liet zo'n adres
+   * onzichtbaar achter, mét foutmelding en zonder knop om het recht te zetten.
+   */
+  const teDoen = subscribers.filter(needsSync);
+
   return (
     <AdminPage
       title="Nieuwsbrief"
@@ -46,12 +54,12 @@ export default async function AdminNewsletterPage() {
         <StatTile label="Totaal" value={String(subscribers.length)} />
       </div>
 
-      {providerConfigured && notForwarded.length > 0 ? (
+      {providerConfigured && teDoen.length > 0 ? (
         <AdminCard className="mb-6 border-brand-200 bg-brand-50">
           <p className="text-sand-800">
             {failed.length > 0
               ? `Bij ${failed.length} ${failed.length === 1 ? 'adres' : 'adressen'} lukte het doorzetten naar ${providerLabel} niet.`
-              : `${notForwarded.length} ${notForwarded.length === 1 ? 'adres staat' : 'adressen staan'} nog niet in ${providerLabel}.`}{' '}
+              : `${teDoen.length} ${teDoen.length === 1 ? 'adres wacht' : 'adressen wachten'} nog op ${providerLabel}.`}{' '}
             De adressen zijn niet kwijt. Je kunt ze hier alsnog doorzetten; dat mag zo vaak als je
             wilt, want een adres dat er al staat telt gewoon mee.
           </p>
