@@ -407,6 +407,17 @@ export interface NewsletterSubscriber {
   providerId?: string | null;
   syncedAt?: Millis | null;
   syncError?: string | null;
+  /**
+   * Toelichting bij een gelukte koppeling, voor als 'gelukt' niet het hele
+   * verhaal is — bijvoorbeeld: staat in de mailinglijst, maar heeft zich daar
+   * uitgeschreven.
+   */
+  syncNote?: string | null;
+  /**
+   * Het IP-adres waarvandaan is ingeschreven: onderbouwing van de toestemming,
+   * en nodig om een inschrijving later alsnog te kunnen doorzetten.
+   */
+  ip?: string | null;
   createdAt: Millis;
 }
 

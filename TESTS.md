@@ -3,7 +3,7 @@
 Deze lijst gaat over dingen die een mens moet doen. De rekenkern en de losse
 beslisregels hebben hun eigen tests (`npm test`); die staan hier niet in.
 
-Bijgewerkt: 24 oktober 2026 — de site staat live op metmekaere.nl.
+Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
 
 ---
 
@@ -102,6 +102,18 @@ Bijgewerkt: 24 oktober 2026 — de site staat live op metmekaere.nl.
 - [ ] **Een activiteit verwijderen neemt haar foto's mee.** Bij een product
       niet, en dat hoort zo: dat wordt gearchiveerd omdat het in bestellingen
       voorkomt.
+
+### Nieuwsbrief, na de reparatie van 25 oktober
+
+- [ ] **Een adres dat al in Laposta staat.** Schrijf een adres in dat daar al
+      staat. Het hoort op *Ingeschreven* te komen met *In Laposta* eronder en
+      de regel 'Stond al in Laposta'. Tot deze reparatie bleef het op *In
+      afwachting* staan, met als foutmelding dat Laposta 400 gaf: de code zocht
+      naar 'already exists' terwijl Laposta 'Email address exists' zegt.
+- [ ] **De knop *Alsnog doorzetten*.** Staat bij *Beheer → Nieuwsbrief* zodra
+      er een adres is dat nog niet in Laposta staat. Hij mag zo vaak als je wil
+      ingedrukt worden; een adres dat er al staat telt gewoon mee. Hiermee is
+      ook het adres van 25 oktober recht te zetten.
 
 ### Beveiliging
 

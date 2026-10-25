@@ -33,10 +33,11 @@ Wat nog ligt, en pas opspeelt bij je eerste echte mailing:
   Laposta het versturen van campagnes.
 - De **privacyverklaring** hoort te vermelden dat adressen naar Laposta gaan.
 
-Verder is er geen manier om adressen die eerder zijn binnengekomen alsnog naar
-Laposta te sturen; dat kan alleen door de inschrijving te herhalen. Zodra dat
-een keer om iemand anders gaat dan jezelf, is een knop *Nu synchroniseren* in
-het beheer de oplossing.
+Alsnog doorzetten wat is blijven hangen kan sinds 25 oktober met de knop
+**Alsnog doorzetten** bij *Beheer → Nieuwsbrief*. Die verscheen toen het een
+keer om iemand anders ging dan onszelf: opnieuw inschrijven via de footer kan
+alleen die persoon zelf, en die weet van niets. Zonder knop was een mislukte
+koppeling dus in de praktijk onherstelbaar.
 
 ### Eigen inhoud
 

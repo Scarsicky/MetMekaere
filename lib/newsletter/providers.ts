@@ -26,7 +26,12 @@ export interface SubscribeInput {
 
 export type ProviderResult =
   | { status: 'skipped' }
-  | { status: 'ok'; providerId: string | null }
+  /**
+   * Gelukt. `note` is een korte toelichting voor in het beheer, voor de
+   * gevallen waarin 'gelukt' niet het hele verhaal is: het adres stond er al,
+   * of het staat er wel maar krijgt toch geen mail.
+   */
+  | { status: 'ok'; providerId: string | null; note?: string }
   | { status: 'error'; message: string };
 
 function providerName(): NewsletterProviderName {
@@ -44,7 +49,7 @@ function splitName(name?: string): { first: string; last: string } {
 
 const TIMEOUT_MS = 8000;
 
-async function postJson(url: string, init: RequestInit): Promise<Response> {
+async function apiFetch(url: string, init: RequestInit): Promise<Response> {
   return fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
 }
 
@@ -60,7 +65,7 @@ async function subscribeMailerLite(input: SubscribeInput): Promise<ProviderResul
   const { first, last } = splitName(input.name);
 
   try {
-    const res = await postJson('https://connect.mailerlite.com/api/subscribers', {
+    const res = await apiFetch('https://connect.mailerlite.com/api/subscribers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -111,9 +116,54 @@ async function subscribeMailerLite(input: SubscribeInput): Promise<ProviderResul
 const LAPOSTA_FIRSTNAME_FIELD = process.env.LAPOSTA_FIRSTNAME_FIELD ?? '';
 const LAPOSTA_LASTNAME_FIELD = process.env.LAPOSTA_LASTNAME_FIELD ?? '';
 
+/** De toestanden die Laposta aan een adres kan geven. */
+type LapostaState = 'active' | 'unsubscribed' | 'unconfirmed' | 'cleaned';
+
+interface LapostaMember {
+  member_id?: string;
+  state?: LapostaState | string;
+}
+
 interface LapostaResponse {
-  member?: { member_id?: string };
-  error?: { message?: string; code?: number };
+  member?: LapostaMember;
+  error?: { message?: string; code?: number; parameter?: string };
+}
+
+/**
+ * Staat dit adres al in de lijst?
+ *
+ * Laposta meldt dat met code 204 — 'de parameter komt al voor' — bij de
+ * parameter `email`. Op de tekst afgaan bleek onbetrouwbaar: die luidt
+ * `Email address exists`, zonder het woord 'already' waar de eerste versie van
+ * deze code naar zocht. Daardoor gold een adres dat er gewoon al stond als een
+ * mislukte inschrijving. Nu eerst de code, en de tekst alleen als vangnet.
+ */
+export function isLapostaDuplicate(data: LapostaResponse): boolean {
+  if (data.error?.code === 204) return true;
+  return /exist|bestaat al|komt al voor|al ingeschreven/i.test(data.error?.message ?? '');
+}
+
+/**
+ * Wat er in het beheer bij het adres komt te staan.
+ *
+ * 'Doorgezet' en 'krijgt mail' zijn niet hetzelfde. Iemand kan in Laposta
+ * staan en zich daar hebben uitgeschreven, of nog op de bevestigingsmail
+ * wachten. Dat hoort zichtbaar te zijn, want anders wacht je op een mailing
+ * die bij deze persoon nooit aankomt.
+ */
+export function lapostaNote(state: string | undefined, existed: boolean): string | undefined {
+  switch (state) {
+    case 'unsubscribed':
+      return 'Staat in Laposta, maar heeft zich daar uitgeschreven. Alleen in Laposta zelf is dat terug te zetten.';
+    case 'cleaned':
+      return 'Staat in Laposta als onbestelbaar. Mail aan dit adres komt niet aan.';
+    case 'unconfirmed':
+      return 'Staat in Laposta en wacht nog op de bevestigingsmail.';
+    case 'active':
+      return existed ? 'Stond al in Laposta.' : undefined;
+    default:
+      return existed ? 'Stond al in Laposta.' : undefined;
+  }
 }
 
 async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> {
@@ -149,7 +199,7 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
   }
 
   async function send(withName: boolean): Promise<{ res: Response; data: LapostaResponse }> {
-    const res = await postJson('https://api.laposta.nl/v2/member', {
+    const res = await apiFetch('https://api.laposta.nl/v2/member', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -163,6 +213,31 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
     return { res, data };
   }
 
+  /**
+   * Het adres opzoeken in de lijst.
+   *
+   * Nodig na 'bestaat al': dat antwoord bevat geen id, en zonder id blijft het
+   * adres in het beheer op *nog niet doorgezet* staan. Een plus-teken in een
+   * adres hoort hier dubbel gecodeerd (`%252B`) — zo staat het in de
+   * handleiding van Laposta, en `encodeURIComponent` laat een plus met rust.
+   */
+  async function lookupMember(): Promise<LapostaMember | null> {
+    try {
+      const path = encodeURIComponent(input.email).replace(/\+/g, '%252B');
+      const res = await apiFetch(
+        `https://api.laposta.nl/v2/member/${path}?list_id=${encodeURIComponent(listId!)}`,
+        { method: 'GET', headers: { Authorization: authorization } },
+      );
+      if (!res.ok) return null;
+      const data = (await res.json().catch(() => ({}))) as LapostaResponse;
+      return data.member ?? null;
+    } catch {
+      // Het opzoeken is een extraatje; mislukt het, dan is dat geen reden om
+      // de inschrijving alsnog als mislukt te boeken.
+      return null;
+    }
+  }
+
   const withName = Boolean(input.name && (LAPOSTA_FIRSTNAME_FIELD || LAPOSTA_LASTNAME_FIELD));
 
   try {
@@ -171,9 +246,10 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
     /*
      * Mislukt het en stuurden we een naam mee, dan is een onbekende veldnaam
      * de waarschijnlijkste oorzaak. Het adres is belangrijker dan de naam, dus
-     * dan liever één keer opnieuw zonder.
+     * dan liever één keer opnieuw zonder. Bij 'bestaat al' heeft dat geen zin:
+     * dan ligt het niet aan de velden.
      */
-    if (!res.ok && withName) {
+    if (!res.ok && withName && !isLapostaDuplicate(data)) {
       console.warn(
         `[newsletter] Laposta weigerde de inschrijving mét naam (${data.error?.message ?? res.status}); ` +
           'opnieuw geprobeerd zonder. Kloppen LAPOSTA_FIRSTNAME_FIELD en ' +
@@ -182,12 +258,31 @@ async function subscribeLaposta(input: SubscribeInput): Promise<ProviderResult> 
       ({ res, data } = await send(false));
     }
 
-    // Al ingeschreven is geen fout: het doel is bereikt.
-    const message = data.error?.message ?? '';
-    if (!res.ok && !/bestaat al|already exists|komt al voor/i.test(message)) {
-      return { status: 'error', message: `Laposta gaf ${res.status}: ${message}` };
+    if (!res.ok) {
+      if (!isLapostaDuplicate(data)) {
+        return {
+          status: 'error',
+          message: `Laposta gaf ${res.status}: ${data.error?.message ?? 'geen toelichting'}`,
+        };
+      }
+
+      // Al ingeschreven is geen fout: het doel is bereikt. Alleen het id moet
+      // er dan apart bij.
+      const member = await lookupMember();
+      return {
+        status: 'ok',
+        providerId: member?.member_id ?? null,
+        note: member
+          ? lapostaNote(member.state, true)
+          : 'Stond al in Laposta; het id was daar niet op te halen.',
+      };
     }
-    return { status: 'ok', providerId: data.member?.member_id ?? null };
+
+    return {
+      status: 'ok',
+      providerId: data.member?.member_id ?? null,
+      note: lapostaNote(data.member?.state, false),
+    };
   } catch (error) {
     return { status: 'error', message: `Laposta onbereikbaar: ${String(error)}` };
   }

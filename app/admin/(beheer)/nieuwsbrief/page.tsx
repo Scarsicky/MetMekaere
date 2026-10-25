@@ -1,3 +1,4 @@
+import { ResyncButton } from '@/app/admin/(beheer)/nieuwsbrief/resync-button';
 import { AdminCard, AdminEmpty, AdminPage, StatTile, StatusPill } from '@/components/admin/ui';
 import { listSubscribers } from '@/lib/newsletter';
 import { configuredProviderLabel, isProviderConfigured } from '@/lib/newsletter/providers';
@@ -45,14 +46,23 @@ export default async function AdminNewsletterPage() {
         <StatTile label="Totaal" value={String(subscribers.length)} />
       </div>
 
-      {failed.length > 0 ? (
+      {providerConfigured && notForwarded.length > 0 ? (
         <AdminCard className="mb-6 border-brand-200 bg-brand-50">
           <p className="text-sand-800">
-            Bij {failed.length} {failed.length === 1 ? 'adres' : 'adressen'} lukte het doorzetten naar
-            de mailinglijst niet. De adressen zijn niet kwijt — controleer de instellingen van de
-            koppeling en schrijf ze daarna opnieuw in.
+            {failed.length > 0
+              ? `Bij ${failed.length} ${failed.length === 1 ? 'adres' : 'adressen'} lukte het doorzetten naar ${providerLabel} niet.`
+              : `${notForwarded.length} ${notForwarded.length === 1 ? 'adres staat' : 'adressen staan'} nog niet in ${providerLabel}.`}{' '}
+            De adressen zijn niet kwijt. Je kunt ze hier alsnog doorzetten; dat mag zo vaak als je
+            wilt, want een adres dat er al staat telt gewoon mee.
           </p>
-          <p className="mt-2 font-mono text-xs break-all text-sand-600">{failed[0].syncError}</p>
+
+          {failed[0]?.syncError ? (
+            <p className="mt-2 font-mono text-xs break-all text-sand-600">{failed[0].syncError}</p>
+          ) : null}
+
+          <div className="mt-4">
+            <ResyncButton label={`Alsnog doorzetten naar ${providerLabel}`} />
+          </div>
         </AdminCard>
       ) : null}
 
@@ -126,6 +136,18 @@ export default async function AdminNewsletterPage() {
                             : providerConfigured
                               ? `Nog niet in ${providerLabel}`
                               : 'Alleen hier bewaard'}
+                        </span>
+                      ) : null}
+
+                      {/*
+                        'Doorgezet' en 'krijgt mail' zijn niet hetzelfde. Wie
+                        zich in de mailinglijst zelf heeft uitgeschreven staat
+                        er wél, maar ontvangt niets — zonder deze regel zou je
+                        op een mailing wachten die daar nooit aankomt.
+                      */}
+                      {subscriber.syncNote ? (
+                        <span className="mt-1 block max-w-[22rem] text-xs text-sand-500">
+                          {subscriber.syncNote}
                         </span>
                       ) : null}
                     </td>

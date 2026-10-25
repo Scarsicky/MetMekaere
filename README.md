@@ -400,6 +400,57 @@ Die blijft gewoon bereikbaar op `metmekaere.web.app`. De nieuwe site heeft de
 kalender ingebouwd en deelt dezelfde gegevens, dus je kunt de oude app laten
 staan of later weghalen — beide werken.
 
+## De logboeken lezen
+
+In de Firebase-console, bij *App Hosting → Logs* (of in Cloud Logging), staan
+de verzoeken aan de site. Twee dingen zijn goed om te weten voordat je ervan
+schrikt.
+
+### Het meeste is scanverkeer, en dat hoort erbij
+
+Een website die aan het internet hangt wordt afgezocht. Niet door iemand die
+het op Met Mekaere gemunt heeft: door scripts die het hele internet langsgaan
+en bij elk adres dezelfde paar duizend paden proberen. Op 25 oktober 2026 waren
+dat er ruim 2000 in negen uur. Ze zochten naar:
+
+- `.env`-bestanden in honderd varianten, inclusief `.env.openai`, `.env.claude`
+  en `/llm/credentials` — gestolen AI-sleutels zijn tegenwoordig handel;
+- `.git`, `terraform.tfstate`, `wp-config.php`, databasedumps;
+- een `/api/proxy?url=…` die ze naar `169.254.169.254` konden laten kijken, het
+  adres waar cloudservers hun eigen inloggegevens bewaren.
+
+Alles kreeg een 404, en dat is geen geluk. Deze site serveert alleen wat een
+route is of in `public/` staat; een willekeurig bestandspad bestaat niet. De
+geheimen zijn geen bestanden maar omgevingsvariabelen uit Secret Manager, en
+een endpoint dat een opgegeven URL ophaalt is er niet — dus er valt niets te
+proxyen.
+
+Je hoeft hier dus niets tegen te doen. Wat wél helpt is de ruis wegfilteren,
+anders zie je je eigen fouten niet meer tussen de 404's:
+
+```
+resource.labels.service_name="metmekaere-web"
+-httpRequest.status=404
+```
+
+Het mintekentje is belangrijk: het laat regels zonder `httpRequest` staan, en
+dat zijn nu juist de meldingen uit de code zelf. Wil je alleen die: zet
+`severity>=ERROR`.
+
+### Het IP-adres en de browser in die regels kloppen niet
+
+In elke regel staat als herkomst een IP van Google en als browser `Google`.
+Dat is niet wie het verzoek deed — het is de CDN van Google die vóór de site
+staat en hem doorgeeft. Je ziet dus de bode, niet de afzender. Ook je eigen
+bezoek aan het beheer staat er zo in.
+
+Daar is geen instelling voor; zo werkt die laag. Wat je wél kunt: de scanner
+herkennen aan wát hij opvraagt, niet aan wie hij zegt te zijn.
+
+De site zelf ziet het echte adres overigens prima — dat staat in de
+`x-forwarded-for`-header, en daar werken de snelheidsbegrenzer en de
+inschrijving bij Laposta mee.
+
 ## Nog na te lopen voordat de shop opengaat
 
 Twee lijsten, elk met een ander doel:
