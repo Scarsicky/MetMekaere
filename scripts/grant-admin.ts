@@ -5,10 +5,14 @@
  *   npm run admin:grant -- jouw@email.nl --wachtwoord Geheim123
  *   npm run admin:grant -- jouw@email.nl --intrekken
  *
- * Bestaat het account nog niet, dan wordt het aangemaakt — geef dan een
- * wachtwoord mee. Alleen een account hebben is niet genoeg om in het beheer te
- * komen; er staat dus nergens een open registratie waarmee iemand zichzelf
- * toegang kan geven.
+ * Alleen een account hebben is niet genoeg om in het beheer te komen; er staat
+ * dus nergens een open registratie waarmee iemand zichzelf toegang kan geven.
+ *
+ * Bestaat het account nog niet, dan moet die persoon éérst één keer met Google
+ * inloggen op /admin — dat wordt geweigerd, maar daarmee bestaat het account.
+ * Draai dit script daarna opnieuw. De vlag `--wachtwoord` maakt zelf een
+ * account aan en is alleen nog nuttig tegen de emulator: inloggen met een
+ * wachtwoord staat in productie uit (oktober 2026).
  *
  * Dit script zet zowel de custom claim `admin: true` als een document in de
  * collectie `admins`. Beide geven toegang.
@@ -60,8 +64,12 @@ async function main() {
     const password = flagValue('wachtwoord') ?? flagValue('password');
     if (!password) {
       console.error(
-        `Er is nog geen account voor ${email}.\n` +
-          `Maak het aan met een wachtwoord:\n  npm run admin:grant -- ${email} --wachtwoord EenGoedWachtwoord`,
+        `Er is nog geen account voor ${email}.\n\n` +
+          'Inloggen gaat met Google. Laat die persoon één keer op "Inloggen met Google"\n' +
+          'drukken op /admin: dat wordt geweigerd — zo hoort het — maar daarmee bestaat\n' +
+          'het account wel. Draai dit script daarna opnieuw.\n\n' +
+          'Tegen de emulator kun je er zelf een maken:\n' +
+          `  npm run admin:grant -- ${email} --wachtwoord EenGoedWachtwoord`,
       );
       process.exit(1);
     }

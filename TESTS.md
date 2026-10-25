@@ -128,14 +128,19 @@ Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
       dat hoort zo.
 - [x] **Inloggen met Google**, met behoud van de bestaande beheerrechten — het
       ging om hetzelfde e-mailadres, dus Google werd aan dat account gekoppeld.
-- [ ] **Het tweede beheeraccount via Google.** Zolang dat niet werkt, blijft
-      inloggen met een wachtwoord nodig. Pas als beide accounts via Google
-      binnenkomen kan die manier eruit — en dan is er pas echt overal een
-      tweede factor.
+- [x] **Inloggen met een wachtwoord is eruit** (25 oktober 2026). Beide
+      beheerders komen via Google binnen, en de wachtwoordmanier staat ook in
+      de Firebase-console uit. Pas daarmee is het af: zolang die ernaast stond,
+      was een wachtwoord nog altijd genoeg om binnen te komen en leverde de
+      tweede factor van Google niets op.
 
-- [ ] **Controleren dat er werkelijk een back-up staat.** Er is een dagelijks
-      schema (31 dagen bewaartijd), maar een schema is nog geen back-up. Een
-      dag later nakijken met `firebase firestore:backups:list`.
+      Raakt Google ooit onbruikbaar, dan zet je in de console die manier weer
+      aan; het inlogformulier ervoor staat in de geschiedenis van
+      `app/admin/login/login-form.tsx`.
+
+- [x] **Er staat werkelijk een back-up** (25 oktober 2026, nagekeken met
+      `firebase firestore:backups:list`). Het dagelijkse schema doet wat het
+      belooft — een schema is tenslotte nog geen back-up.
 
 ### Na de livegang (24 oktober 2026, van buitenaf nagemeten)
 

@@ -47,12 +47,20 @@ npm install
 cp .env.example .env.local     # en vul aan
 npm run emulators              # in een apart venster: Firebase lokaal
 npm run seed                   # startinhoud in de emulator zetten
-npm run admin:grant -- jouw@email.nl --wachtwoord EenGoedWachtwoord
 npm run dev
 ```
 
 De site draait dan op http://localhost:3000 en het beheer op
 http://localhost:3000/admin.
+
+Voor dat beheer moet je één keer inloggen met Google — ook lokaal, want de
+emulator speelt Google na. Druk op *Inloggen met Google*, kies of maak daar een
+adres, en laat je weigeren: de rechten zijn er dan nog niet. Die geef je
+daarna, en vanaf dat moment kun je gewoon inloggen:
+
+```bash
+npm run admin:grant -- jouw@email.nl
+```
 
 Zolang er geen Mollie-sleutel is, krijg je lokaal een **nagebootste betaalpagina**
 waarmee je het hele bestelproces kunt doorlopen — inclusief het afboeken van
@@ -217,31 +225,42 @@ Na de eerste uitrol krijg je een adres als
 `https://metmekaere-web--metmekaere.europe-west4.hosted.app`. Daar ga je naar
 `/admin`.
 
-#### Jezelf beheerder maken
+#### Iemand beheerder maken
 
-Alleen een account aanmaken is niet genoeg — anders zou iedereen die zich
-registreert in het beheer kunnen. Er zijn twee manieren.
+Inloggen gaat **uitsluitend met Google** (sinds 25 oktober 2026; de
+wachtwoordmanier staat in de Firebase-console uit). Een account met een
+wachtwoord aanmaken heeft dus geen zin meer — daarmee komt niemand binnen.
 
-**Via de Firebase-console** (geen sleutelbestand nodig, dus meestal de
-makkelijkste):
+Een account hebben is trouwens niet genoeg, anders kon iedereen met een
+Google-account hier naar binnen. Toegang wordt apart gegeven, en de volgorde
+is daarbij van belang:
 
-1. [Authentication → Users](https://console.firebase.google.com/project/metmekaere/authentication/users)
-   → **Add user**, met je e-mailadres en een wachtwoord. Kopieer de **UID** die
-   je daarna ziet staan.
-2. [Firestore → Data](https://console.firebase.google.com/project/metmekaere/firestore/data)
-   → maak de collectie `admins` aan (als hij er nog niet is) met een document
-   waarvan het **document-id de UID uit stap 1 is**. Een veld `email` met je
-   adres is handig maar niet verplicht.
+1. **Laat die persoon één keer op *Inloggen met Google* drukken** op `/admin`.
+   Hij wordt geweigerd — zo hoort het — maar daarmee bestaat het account, en
+   heeft het een UID.
+2. Zoek die UID op bij
+   [Authentication → Users](https://console.firebase.google.com/project/metmekaere/authentication/users).
+3. Maak bij
+   [Firestore → Data](https://console.firebase.google.com/project/metmekaere/firestore/data)
+   in de collectie `admins` een document aan waarvan het **document-id die UID
+   is**. Een veld `email` is handig maar niet verplicht.
 
-Klaar. Inloggen kan meteen.
+Daarna werkt inloggen meteen.
 
-**Of met het script**, als je een service-account-sleutel op deze computer hebt
-staan (`GOOGLE_APPLICATION_CREDENTIALS`). Zet dan eerst de emulator-regels in
-`.env.local` uit, anders maak je het account in de emulator aan:
+**Of met het script**, als er een service-account-sleutel op deze computer
+staat (`GOOGLE_APPLICATION_CREDENTIALS`). Stap 1 blijft dan nodig; het script
+doet stap 2 en 3. Zet eerst de emulator-regels in `.env.local` uit, anders geef
+je rechten in de emulator:
 
 ```bash
-npm run admin:grant -- jouw@email.nl --wachtwoord EenGoedWachtwoord
+npm run admin:grant -- iemand@example.nl
 ```
+
+Intrekken gaat met `--intrekken`; dan vervallen lopende sessies ook meteen.
+
+> **Raakt Google onbruikbaar?** Zet in de console bij *Authentication →
+> Sign-in method* de wachtwoordmanier weer aan. Het inlogformulier daarvoor
+> staat in de geschiedenis van `app/admin/login/login-form.tsx`.
 
 #### De site vullen
 
