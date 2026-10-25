@@ -103,17 +103,22 @@ Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
       niet, en dat hoort zo: dat wordt gearchiveerd omdat het in bestellingen
       voorkomt.
 
-### Nieuwsbrief, na de reparatie van 25 oktober
+### Nieuwsbrief
 
-- [ ] **Een adres dat al in Laposta staat.** Schrijf een adres in dat daar al
-      staat. Het hoort op *Ingeschreven* te komen met *In Laposta* eronder en
-      de regel 'Stond al in Laposta'. Tot deze reparatie bleef het op *In
-      afwachting* staan, met als foutmelding dat Laposta 400 gaf: de code zocht
-      naar 'already exists' terwijl Laposta 'Email address exists' zegt.
-- [ ] **De knop *Alsnog doorzetten*.** Staat bij *Beheer → Nieuwsbrief* zodra
-      er een adres is dat nog niet in Laposta staat. Hij mag zo vaak als je wil
-      ingedrukt worden; een adres dat er al staat telt gewoon mee. Hiermee is
-      ook het adres van 25 oktober recht te zetten.
+- [x] **Een adres dat al in Laposta staat** (25 oktober 2026). Bleef eerst op
+      *In afwachting* staan omdat de code naar 'already exists' zocht terwijl
+      Laposta 'Email address exists' zegt. Na de reparatie kwam het adres goed
+      te staan.
+- [x] **De knop *Alsnog doorzetten*** (25 oktober 2026). Zette het vastgelopen
+      adres in één klik recht, en verdween daarna vanzelf — want er viel niets
+      meer op te lossen.
+
+      Die knop was er eerst níet, en dat was leerzaam. 'Nog op te lossen' was
+      gelijkgesteld aan 'heeft geen Laposta-id', en juist dit adres hád er een:
+      die persoon had zich eerder al eens met goed gevolg ingeschreven. Te
+      herkennen aan een regel die zichzelf tegensprak — *In afwachting* met
+      *In Laposta* eronder. Sindsdien kijken het scherm en de herstelronde naar
+      dezelfde regel (`needsSync`).
 
 ### Beveiliging
 
