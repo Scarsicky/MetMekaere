@@ -51,21 +51,21 @@ Wat nog loopt:
   moment op concept en is daardoor nergens op de site te vinden — zet hem op
   gepubliceerd zodra de woorden erin staan.
 
-- Een eigen **favicon**. Het pictogram in het tabblad is nog dat van Next.js:
-  een zwart rondje met een witte driehoek. Het zit in `app/favicon.ico` — in de
-  broncode dus, niet ergens in een instelling. Voor de telefoon staat het eigen
-  logo er wél goed in (`public/icons/`), dus het gaat om dit ene bestand.
+- De **favicon mag een keer opnieuw getekend worden**, maar het heeft geen
+  haast. In `app/favicon.ico` staat sinds 25 oktober de rode M, in vier maten:
+  16, 32, 48 en 256 punten. De eerste twee zijn het ontwerp zelf; 48 en 256
+  zijn eruit opgeschaald, want het aangeleverde beeld was 30 bij 32 punten en
+  groter was er niet.
 
-  De vangst zit in het ontwerp, niet in het vervangen. Een favicon wordt op 16
-  bij 16 punten getoond, en de krans met *MET MEKAERE · SAMEN VERBINDEN* is dan
-  een vlekje. Er is een vereenvoudigd merkteken nodig dat op die maat nog iets
-  betekent: de geschreven *Met*, een losse tak, of één letter. Maak hem dan
-  meteen groot genoeg mee (256 punten) voor bladwijzers en de zoekresultaten
-  van Google.
+  Dat zie je aan de grootste maat: de schuine lijnen golven licht en de grijze
+  streep rechtsboven staat in trapjes. In een tabblad — waar hij vrijwel altijd
+  terechtkomt — is daar niets van te merken. Wil je het wél scherp, dan moet de
+  M opnieuw uit het oorspronkelijke ontwerpbestand komen, of als `.svg`. Die
+  heet dan `app/icon.svg` en `favicon.ico` moet weg, anders zet Next ze allebei
+  in de pagina.
 
-  Daarna is het één bestand overschrijven. Een `.svg` kan ook — die blijft op
-  elke maat scherp — maar dan heet hij `app/icon.svg` en moet `favicon.ico`
-  weg, anders zet Next ze allebei in de pagina.
+  Let bij een nieuwe versie op twee dingen: hij hoort vierkant te zijn, en het
+  beeld loopt met opzet aan alle vier de randen door.
 
 > De algemene voorwaarden en de privacyverklaring in
 > `lib/cms/default-content.ts` zijn een werkbare opzet, geen juridisch advies.
