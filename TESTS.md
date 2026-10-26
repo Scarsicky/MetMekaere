@@ -138,12 +138,16 @@ Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
       aan; het inlogformulier ervoor staat in de geschiedenis van
       `app/admin/login/login-form.tsx`.
 
-- [ ] **Inloggen met Google ná de nieuwe vensterregel** (26 oktober 2026). De
-      site zegt nu tegen de browser dat andere vensters niet bij dit venster
-      mogen (`Cross-Origin-Opener-Policy`). Dat is met opzet de variant die
-      popups heelhoudt, want inloggen gebeurt in zo'n venster — maar dit is
-      precies het soort instelling waarvan je het pas merkt als je het
-      probeert. Eén keer in- en uitloggen is genoeg.
+- [x] **Inloggen met Google ná de nieuwe vensterregel** (26 oktober 2026, twee
+      keer uit- en weer ingelogd). De site zegt nu tegen de browser dat andere
+      vensters niet bij dit venster mogen (`Cross-Origin-Opener-Policy`), maar
+      dan in de variant die popups heelhoudt — en inloggen gebeurt in zo'n
+      venster.
+
+      Dit was niet van buitenaf te bewijzen: een browser weigert een proefvenster
+      te openen als er geen mens op heeft geklikt. Blijft dus een punt om te
+      herhalen als die regel ooit strenger wordt gezet. `same-origin` zonder
+      meer sluit het beheer af.
 
 - [x] **Er staat werkelijk een back-up** (25 oktober 2026, nagekeken met
       `firebase firestore:backups:list`). Het dagelijkse schema doet wat het
