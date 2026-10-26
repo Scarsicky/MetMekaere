@@ -3,7 +3,8 @@
 Deze lijst gaat over dingen die een mens moet doen. De rekenkern en de losse
 beslisregels hebben hun eigen tests (`npm test`); die staan hier niet in.
 
-Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
+Bijgewerkt: 26 oktober 2026 — de site is open en er lopen bestellingen van
+echte klanten binnen.
 
 ---
 
@@ -79,13 +80,15 @@ Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
 
 ## Nog te doen
 
-### Belangrijk voor de opening
+### Bestellen en betalen met de live-sleutel
 
 - [x] **Een echte betaling met de live-sleutel** (24 oktober 2026). De betaling
       kwam door en de bestelling stond goed in het overzicht.
-- [ ] Datzelfde nog eens vanaf een telefoon, met de iDEAL-app erbij. Het
-      wisselen naar de bankapp en weer terug is het enige stuk dat nergens
-      anders uit blijkt.
+- [x] **Datzelfde vanaf een telefoon, met de iDEAL-app erbij** (26 oktober
+      2026). Het wisselen naar de bankapp en weer terug was het laatste stuk
+      dat nergens anders uit bleek. Zelf gedaan, en inmiddels bevestigd door
+      bestellingen van echte klanten.
+
 ### Foto's
 
 - [x] **Worden bij het uploaden verkleind** naar maximaal 1600 punten.
