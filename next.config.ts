@@ -63,6 +63,28 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains',
           },
+          /*
+           * Andere vensters kunnen niet meer bij dit venster.
+           *
+           * Met opzet `same-origin-allow-popups` en niet `same-origin`, hoe
+           * vaak dat laatste ook wordt aangeraden: dat verbreekt de band met
+           * het inlogvenster van Google, en dan komt niemand het beheer nog
+           * in. Inloggen gaat via `signInWithPopup`, en dat venster moet
+           * kunnen terugpraten.
+           */
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+          /*
+           * Onze eigen bestanden mogen alleen door onze eigen pagina's worden
+           * geladen. Bescheiden winst — de productfoto's staan bij Cloud
+           * Storage en vallen hier dus niet onder, dit dekt alleen onze
+           * scripts, stijlen en het logo — maar het kost niets.
+           *
+           * Dit geldt voor bronnen in een pagina, niet voor het aanklikken van
+           * een link. Linkjes naar de site blijven dus gewoon werken, en wie
+           * een pagina deelt op sociale media krijgt nog steeds een voorbeeld
+           * te zien: die diensten halen zo'n plaatje van hun eigen server af.
+           */
+          { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
         ],
       },
     ];

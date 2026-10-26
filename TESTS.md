@@ -138,6 +138,13 @@ Bijgewerkt: 25 oktober 2026 — de site staat live op metmekaere.nl.
       aan; het inlogformulier ervoor staat in de geschiedenis van
       `app/admin/login/login-form.tsx`.
 
+- [ ] **Inloggen met Google ná de nieuwe vensterregel** (26 oktober 2026). De
+      site zegt nu tegen de browser dat andere vensters niet bij dit venster
+      mogen (`Cross-Origin-Opener-Policy`). Dat is met opzet de variant die
+      popups heelhoudt, want inloggen gebeurt in zo'n venster — maar dit is
+      precies het soort instelling waarvan je het pas merkt als je het
+      probeert. Eén keer in- en uitloggen is genoeg.
+
 - [x] **Er staat werkelijk een back-up** (25 oktober 2026, nagekeken met
       `firebase firestore:backups:list`). Het dagelijkse schema doet wat het
       belooft — een schema is tenslotte nog geen back-up.

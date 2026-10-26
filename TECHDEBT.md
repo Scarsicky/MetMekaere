@@ -183,6 +183,61 @@ aan de orderafhandeling verandert.
 
 ## Bewuste keuzes
 
+### Geen Content Security Policy
+
+Een beveiligingsscan vraagt er altijd om, en bij een webshop is dat meestal
+terecht: zo'n regel moet voorkomen dat een besmet script van een derde partij
+meeleest wat een klant intikt. Afgewogen en niet gedaan (26 oktober 2026), om
+twee redenen die hier samenvallen.
+
+**Er is weinig te beschermen.** Deze site laadt geen enkel script van buiten —
+geen statistieken, geen chatvenster, geen tag manager. Betaalgegevens komen
+hier nooit langs; die worden bij Mollie ingevuld. React zet alle tekst
+automatisch veilig op de pagina, en de enige plek waar echte HTML ontstaat is
+redactionele tekst uit het CMS. Die wordt opgeschoond (`lib/markdown.ts`) en
+komt van de beheerders zelf. De JSON-LD die meegestuurd wordt kan niet
+ontsnappen: `<` wordt daar `<` (`lib/seo.ts`).
+
+**En het kost hier ongewoon veel.** Next zet op elke pagina een stuk of acht
+eigen `<script>`-blokjes neer met de gegevens voor die pagina. Een strenge CSP
+blokkeert die, tenzij elk blokje een eenmalig nummer meekrijgt — en dat nummer
+moet per bezoeker verschillen. De handleiding bij onze Next-versie is daar
+stellig over: *"you must use dynamic rendering to add nonces"*. Nu wordt het
+meeste vooraf gebakken en door het CDN geserveerd (`/`, `/over`, `/contact`,
+`/privacy`, `/doen-en-beleven` en alle productpagina's; alleen `/webshop` en de
+categorieën worden per bezoeker gemaakt). Met een CSP met nummers verhuist die
+hele eerste groep naar 'elke keer opnieuw': meer serverstarts, een tragere
+eerste indruk, en vaker die koude start van `minInstances: 0`.
+
+Er is een tussenweg — een vaste CSP die onze eigen inline-scripts toestaat —
+die het CDN heel laat. Die wint wel iets echts (scripts van vreemde adressen
+geweigerd, `object-src 'none'`, `base-uri`, `form-action`, `frame-ancestors`),
+maar houdt een script dat via onze eigen pagina binnenkomt niet tegen. Het
+rapportcijfer gaat er meer op vooruit dan de veiligheid.
+
+*Aanleiding om terug te komen:* zodra er één script van buiten bijkomt —
+statistieken, een chatvenster, een ingesloten video, een betaalveld op de site
+zelf. Dan verandert de afweging van netheid in noodzaak. Begin dan met
+`Content-Security-Policy-Report-Only`, dan meldt de browser wat hij zou
+blokkeren zonder iets kapot te maken. Let op het beheer: Firebase praat met
+`identitytoolkit.googleapis.com` en `securetoken.googleapis.com`, en opent een
+venster naar `metmekaere.firebaseapp.com`.
+
+### Geen Cross-Origin-Embedder-Policy
+
+Deze staat in hetzelfde rijtje van elke scan, maar zou hier echt iets slopen.
+`require-corp` betekent: laad geen bron van buiten die niet uitdrukkelijk
+toestemming geeft. De productfoto's komen van `storage.googleapis.com`, en die
+antwoorden zonder `cross-origin-resource-policy`. Aanzetten betekent dus:
+**elke foto van de site weg.**
+
+Die header bestaat om `SharedArrayBuffer` en nauwkeurige timers te kunnen
+gebruiken. Wij doen geen van beide.
+
+*Aanleiding om terug te komen:* niet. Hooguit als de foto's ooit vanaf ons
+eigen adres geserveerd worden én we iets gaan doen waarvoor die isolatie nodig
+is — en dat laatste gaat op een webshop niet gebeuren.
+
 ### Filters worden in het geheugen toegepast
 
 `getActiveProducts()` haalt alle actieve producten op en filtert daarna in het
