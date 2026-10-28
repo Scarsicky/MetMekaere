@@ -149,8 +149,29 @@ describe('gestructureerde gegevens', () => {
 
     expect(beleid.merchantReturnDays).toBe(14);
     expect(beleid.applicableCountry).toEqual(['NL', 'BE']);
+  });
+
+  /*
+   * Deze waarden zijn een woordenlijst, geen beschrijving: ze bestaan precies
+   * zo of ze bestaan niet. Er stond hier een dag lang
+   * `ReturnFeesCustomerResponsibleForShipping` — verzonnen, logisch klinkend,
+   * afgewezen door Google. Vandaar dat ze hier letterlijk vastliggen.
+   */
+  it('gebruikt alleen termen die schema.org echt kent', () => {
+    on('https://metmekaere.nl');
+    const data = productJsonLd(product as never, general as never) as never as {
+      offers: { hasMerchantReturnPolicy: Record<string, unknown> };
+    };
+    const beleid = data.offers.hasMerchantReturnPolicy;
+
+    expect(beleid.returnPolicyCategory).toBe(
+      'https://schema.org/MerchantReturnFiniteReturnWindow',
+    );
+    expect(beleid.returnMethod).toBe('https://schema.org/ReturnByMail');
     // De klant stuurt zelf terug en betaalt dat zelf; zo staat het op de site.
-    expect(beleid.returnFees).toBe('https://schema.org/ReturnFeesCustomerResponsibleForShipping');
+    expect(beleid.returnFees).toBe('https://schema.org/ReturnFeesCustomerResponsibility');
+    // Hoort er niet bij te staan als de klant zijn eigen verzending regelt.
+    expect(beleid.returnShippingFeesAmount).toBeUndefined();
   });
 
   it('valt terug op Nederland als er geen verzendmethode is', () => {

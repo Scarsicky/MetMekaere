@@ -180,8 +180,19 @@ function merchantReturnPolicy(countries: string[]) {
     returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
     merchantReturnDays: RETURN_WINDOW_DAYS,
     returnMethod: 'https://schema.org/ReturnByMail',
-    // De klant regelt en betaalt het terugsturen zelf.
-    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibleForShipping',
+    /*
+     * De klant betaalt het terugsturen zelf.
+     *
+     * Let op de naam: `ReturnFeesCustomerResponsibility`, niet
+     * `...ResponsibleForShipping`. Die tweede klinkt logischer en bestaat niet;
+     * hij stond hier een dag in en Google's controle wees hem af. Deze waarden
+     * zijn geen beschrijving maar een woordenlijst — ze bestaan precies zo of
+     * ze bestaan niet.
+     *
+     * Hierbij hoort géén `returnShippingFeesAmount`: wij rekenen niets, de
+     * klant betaalt zijn eigen postzegel en wat die kost weten wij niet.
+     */
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
   };
 }
 
