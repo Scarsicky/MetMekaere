@@ -160,6 +160,16 @@ export const getShippingRates = cached(
 );
 
 /**
+ * De namen van de methodes die 'ophalen' zijn.
+ *
+ * Alleen nodig om bestellingen van vóór 28 oktober 2026 te herkennen: die
+ * legden nog niet zelf vast of ze opgehaald werden. Zie `isPickupOrder`.
+ */
+export async function getPickupMethodNames(): Promise<string[]> {
+  return (await getShippingRates()).filter((rate) => rate.isPickup).map((rate) => rate.name);
+}
+
+/**
  * Kortingscode opzoeken. Nooit gecached: `usedCount` loopt op en een code die
  * net is uitgeschakeld moet direct geweigerd worden.
  */

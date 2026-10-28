@@ -123,6 +123,21 @@ echte klanten binnen.
       *In Laposta* eronder. Sindsdien kijken het scherm en de herstelronde naar
       dezelfde regel (`needsSync`).
 
+### Ophalen in plaats van verzenden
+
+- [ ] **Een ophaalbestelling afhandelen** (nieuw, 28 oktober 2026). Bestel iets
+      met ophalen, en kijk of het beheer meegaat: de knop hoort *Markeer als
+      opgehaald* te heten, er hoort géén veld voor een Track & Trace-code te
+      staan, en de status wordt daarna *Opgehaald*. De klant krijgt een mail
+      met 'Je bestelling is opgehaald'.
+- [ ] **En een gewone bestelling erna**, om te zien dat die nog steeds over
+      versturen gaat. Dat is de kant die stuk kan gaan: alle teksten komen nu
+      uit dezelfde plek.
+- [ ] **Een ophaalbestelling van vóór 28 oktober.** Die legde nog niet vast dát
+      hij opgehaald werd; de naam van de verzendmethode moet dat goedmaken.
+      Hernoem je die methode, dan gaat zo'n oude bestelling weer over versturen
+      praten — niet mooi, maar wel de veilige kant.
+
 ### Beveiliging
 
 - [x] **Firestore-regels worden afgedwongen.** Van buitenaf geprobeerd te lezen

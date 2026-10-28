@@ -4,6 +4,7 @@ import nodemailer, { type Transporter } from 'nodemailer';
 
 import { formatCents } from '@/lib/money';
 import { absoluteUrl } from '@/lib/seo';
+import { addressHeading, isPickupOrder, shippingLineLabel } from '@/lib/shop/order-rules';
 import { formatDateNL } from '@/lib/utils';
 import type { GeneralSettings, Order } from '@/types';
 
@@ -194,7 +195,7 @@ function totalsHtml(order: Order): string {
       ? row(`Korting ${order.discountCode ?? ''}`.trim(), `− ${formatCents(order.discountCents)}`)
       : '',
     row(
-      `Verzending · ${order.shippingMethod}`,
+      shippingLineLabel(order),
       order.shippingCents === 0 ? 'Gratis' : formatCents(order.shippingCents),
     ),
     row('Totaal', formatCents(order.totalCents), true),
@@ -241,10 +242,10 @@ export async function sendOrderConfirmation(order: Order, general: GeneralSettin
     `Subtotaal: ${formatCents(order.grossSubtotalCents)}`,
     order.tierDiscountCents > 0 ? `Staffelvoordeel: − ${formatCents(order.tierDiscountCents)}` : '',
     order.discountCents > 0 ? `Korting: − ${formatCents(order.discountCents)}` : '',
-    `Verzending (${order.shippingMethod}): ${order.shippingCents === 0 ? 'gratis' : formatCents(order.shippingCents)}`,
+    `${shippingLineLabel(order)}: ${order.shippingCents === 0 ? 'gratis' : formatCents(order.shippingCents)}`,
     `Totaal: ${formatCents(order.totalCents)}`,
     '',
-    'Bezorgadres:',
+    `${addressHeading(isPickupOrder(order))}:`,
     ...address,
     '',
     'Heb je een vraag? Antwoord gewoon op deze mail.',
@@ -264,7 +265,7 @@ export async function sendOrderConfirmation(order: Order, general: GeneralSettin
      </p>
      <table style="width:100%;border-collapse:collapse">${orderLinesHtml(order)}</table>
      <table style="width:100%;border-collapse:collapse;margin-top:16px">${totalsHtml(order)}</table>
-     <h2 style="margin:28px 0 8px;font-size:16px">Bezorgadres</h2>
+     <h2 style="margin:28px 0 8px;font-size:16px">${addressHeading(isPickupOrder(order))}</h2>
      <p style="margin:0;color:#4a443c;line-height:1.6">${address.map(escapeHtml).join('<br>')}</p>
      <p style="margin:28px 0 0;color:#6b6257">Heb je een vraag? Antwoord gewoon op deze mail.</p>`,
   );
@@ -287,9 +288,9 @@ export async function sendOrderNotification(
     orderLinesText(order),
     '',
     `Totaal: ${formatCents(order.totalCents)}`,
-    `Verzending: ${order.shippingMethod}`,
+    shippingLineLabel(order),
     '',
-    'Bezorgadres:',
+    `${addressHeading(isPickupOrder(order), true)}:`,
     ...addressLines(order),
     order.notes ? `\nOpmerking van de klant:\n${order.notes}` : '',
     '',
@@ -308,7 +309,7 @@ export async function sendOrderNotification(
      </p>
      <table style="width:100%;border-collapse:collapse">${orderLinesHtml(order)}</table>
      <table style="width:100%;border-collapse:collapse;margin-top:16px">${totalsHtml(order)}</table>
-     <h2 style="margin:28px 0 8px;font-size:16px">Bezorgadres</h2>
+     <h2 style="margin:28px 0 8px;font-size:16px">${addressHeading(isPickupOrder(order), true)}</h2>
      <p style="margin:0;color:#4a443c;line-height:1.6">${addressLines(order).map(escapeHtml).join('<br>')}</p>
      ${order.notes ? `<h2 style="margin:24px 0 8px;font-size:16px">Opmerking</h2><p style="margin:0;color:#4a443c">${escapeHtml(order.notes)}</p>` : ''}
      <p style="margin:28px 0 0">
@@ -397,6 +398,47 @@ export async function sendShippingNotice(order: Order, general: GeneralSettings)
        Bestelnummer ${escapeHtml(order.orderNumber)} is verstuurd en valt binnenkort op de mat.
      </p>
      ${order.trackingCode ? `<p style="margin:0;color:#4a443c">Track &amp; Trace: <strong>${escapeHtml(order.trackingCode)}</strong></p>` : ''}`,
+  );
+
+  return send({ to: order.customer.email, subject, text, html, general });
+}
+
+/**
+ * Bevestiging dat een bestelling is opgehaald.
+ *
+ * Een eigen mail en niet die van het versturen: 'je bestelling is onderweg'
+ * klopt van geen kant als iemand hem net in de winkel heeft meegenomen. Deze
+ * mail brengt geen nieuws — de klant stond erbij — maar sluit de bestelling
+ * netjes af en geeft hem iets om later terug te zoeken.
+ */
+export async function sendPickupNotice(order: Order, general: GeneralSettings): Promise<MailResult> {
+  const subject = `Je bestelling ${order.orderNumber} is opgehaald`;
+
+  const text = [
+    `Hoi ${order.customer.name.split(' ')[0]},`,
+    '',
+    `Je hebt bestelling ${order.orderNumber} opgehaald. Bedankt, en veel plezier ermee!`,
+    '',
+    'Hiermee is de bestelling afgerond. Klopt er iets niet, of heb je een vraag?',
+    'Antwoord gewoon op deze mail.',
+    '',
+    general.signature ?? general.siteName,
+  ]
+    .filter((line) => line !== '')
+    .join('\n');
+
+  const html = shell(
+    general,
+    subject,
+    `<h1 style="margin:0 0 8px;font-size:22px">Je bestelling is opgehaald</h1>
+     <p style="margin:0 0 16px;color:#4a443c">
+       Je hebt bestelling <strong>${escapeHtml(order.orderNumber)}</strong> opgehaald. Bedankt, en
+       veel plezier ermee!
+     </p>
+     <p style="margin:0;color:#6b6257">
+       Hiermee is de bestelling afgerond. Klopt er iets niet, of heb je een vraag? Antwoord gewoon
+       op deze mail.
+     </p>`,
   );
 
   return send({ to: order.customer.email, subject, text, html, general });

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 
-import { ORDER_STATUS_LABELS } from '@/app/admin/(beheer)/page';
 import { AdminEmpty, AdminList, AdminListRow, AdminPage, StatusPill } from '@/components/admin/ui';
 import { formatCents } from '@/lib/money';
+import { getPickupMethodNames } from '@/lib/data/catalog';
+import { orderStatusLabel } from '@/lib/shop/order-rules';
 import { listOrders } from '@/lib/shop/orders';
 import { formatDateNL } from '@/lib/utils';
 import type { OrderStatus } from '@/types';
@@ -11,8 +12,8 @@ export const metadata = { title: 'Bestellingen' };
 
 const FILTERS: { value: string; label: string; matches: (status: OrderStatus) => boolean }[] = [
   { value: '', label: 'Alles', matches: () => true },
-  { value: 'paid', label: 'Te versturen', matches: (s) => s === 'paid' },
-  { value: 'shipped', label: 'Verstuurd', matches: (s) => s === 'shipped' },
+  { value: 'paid', label: 'Af te handelen', matches: (s) => s === 'paid' },
+  { value: 'shipped', label: 'Afgehandeld', matches: (s) => s === 'shipped' },
   { value: 'pending', label: 'Wacht op betaling', matches: (s) => s === 'pending' },
   {
     value: 'niet-gelukt',
@@ -26,7 +27,11 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  const [orders, params] = await Promise.all([listOrders(300), searchParams]);
+  const [orders, params, pickupMethods] = await Promise.all([
+    listOrders(300),
+    searchParams,
+    getPickupMethodNames(),
+  ]);
 
   const active = FILTERS.find((f) => f.value === (params.status ?? '')) ?? FILTERS[0];
   const visible = orders.filter((order) => active.matches(order.status));
@@ -38,7 +43,7 @@ export default async function AdminOrdersPage({
   return (
     <AdminPage
       title="Bestellingen"
-      description="Betaalde bestellingen staan bovenaan bij ‘te versturen’. Klik er een aan om het adres te zien en hem af te melden."
+      description="Betaalde bestellingen staan bovenaan bij ‘af te handelen’. Klik er een aan om het adres te zien en hem af te melden."
     >
       <div className="mb-5 flex flex-wrap gap-2">
         {FILTERS.map((filter) => (
@@ -68,7 +73,7 @@ export default async function AdminOrdersPage({
       ) : (
         <AdminList>
           {visible.map((order) => {
-            const status = ORDER_STATUS_LABELS[order.status];
+            const status = orderStatusLabel(order, pickupMethods);
             const itemCount = order.lines.reduce((sum, line) => sum + line.qty, 0);
 
             return (

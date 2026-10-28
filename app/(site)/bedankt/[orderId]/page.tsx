@@ -8,6 +8,7 @@ import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/section';
 import { getGeneralSettings } from '@/lib/data/settings';
 import { formatCents } from '@/lib/money';
+import { addressHeading, isPickupOrder, shippingLineLabel } from '@/lib/shop/order-rules';
 import { syncOrderWithPayment } from '@/lib/shop/payment-flow';
 import { formatDateNL } from '@/lib/utils';
 import type { Order } from '@/types';
@@ -213,7 +214,9 @@ function OrderCard({ order }: { order: Order }) {
           </div>
         ) : null}
         <div className="flex justify-between">
-          <dt className="text-sand-700">Verzending · {order.shippingMethod}</dt>
+          <dt className="text-sand-700">
+            {shippingLineLabel(order)}
+          </dt>
           <dd className="tabular">
             {order.shippingCents === 0 ? 'Gratis' : formatCents(order.shippingCents)}
           </dd>
@@ -225,7 +228,9 @@ function OrderCard({ order }: { order: Order }) {
       </dl>
 
       <div className="mt-5 border-t border-sand-300 pt-4 text-sm text-sand-700">
-        <p className="font-display font-semibold text-sand-900">Bezorgadres</p>
+        <p className="font-display font-semibold text-sand-900">
+          {addressHeading(isPickupOrder(order))}
+        </p>
         <p className="mt-1 leading-relaxed">
           {order.shipping.name}
           <br />

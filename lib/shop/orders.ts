@@ -117,6 +117,7 @@ export async function createPendingOrder(
     discountCode: cart.discountCode ?? null,
     discountCents: cart.discountCents,
     shippingMethod: cart.shippingName ?? 'Geen verzending',
+    shippingIsPickup: cart.shippingIsPickup,
     shippingCents: cart.shippingCents,
     totalCents: cart.totalCents,
     vatBreakdown: cart.vatBreakdown,

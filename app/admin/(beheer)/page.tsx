@@ -3,27 +3,21 @@ import Link from 'next/link';
 import { AdminCard, AdminPage, StatTile, StatusPill } from '@/components/admin/ui';
 import { ADMIN_NAV } from '@/lib/admin/navigation';
 import { countTodo, runHealthChecks } from '@/lib/admin/health';
-import { getAllProductsForAdmin } from '@/lib/data/catalog';
+import { getAllProductsForAdmin, getPickupMethodNames } from '@/lib/data/catalog';
 import { formatCents } from '@/lib/money';
+import { orderStatusLabel } from '@/lib/shop/order-rules';
 import { listOrders } from '@/lib/shop/orders';
 import { cn, formatDateNL } from '@/lib/utils';
-import type { Order } from '@/types';
 
 export const metadata = { title: 'Overzicht' };
 
-/** Hoe een orderstatus eruitziet in het overzicht. */
-export const ORDER_STATUS_LABELS: Record<Order['status'], { label: string; tone: 'green' | 'amber' | 'red' | 'grey' | 'blue' }> = {
-  pending: { label: 'Wacht op betaling', tone: 'amber' },
-  paid: { label: 'Betaald', tone: 'green' },
-  shipped: { label: 'Verstuurd', tone: 'blue' },
-  failed: { label: 'Mislukt', tone: 'red' },
-  expired: { label: 'Verlopen', tone: 'grey' },
-  canceled: { label: 'Geannuleerd', tone: 'grey' },
-  refunded: { label: 'Terugbetaald', tone: 'grey' },
-};
 
 export default async function AdminDashboard() {
-  const [orders, products] = await Promise.all([listOrders(200), getAllProductsForAdmin()]);
+  const [orders, products, pickupMethods] = await Promise.all([
+    listOrders(200),
+    getAllProductsForAdmin(),
+    getPickupMethodNames(),
+  ]);
   const checks = await runHealthChecks();
   const todo = countTodo(checks);
 
@@ -52,9 +46,9 @@ export default async function AdminDashboard() {
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
-          label="Klaar om te versturen"
+          label="Nog af te handelen"
           value={String(toShip.length)}
-          hint={toShip.length ? 'Betaald, nog niet verstuurd' : 'Alles is de deur uit'}
+          hint={toShip.length ? 'Betaald, nog niet verstuurd of opgehaald' : 'Alles is de deur uit'}
           href="/admin/bestellingen?status=paid"
           tone={toShip.length ? 'attention' : 'plain'}
         />
@@ -117,7 +111,7 @@ export default async function AdminDashboard() {
           {recent.length ? (
             <ul className="flex flex-col gap-1">
               {recent.map((order) => {
-                const status = ORDER_STATUS_LABELS[order.status];
+                const status = orderStatusLabel(order, pickupMethods);
                 return (
                   <li key={order.id}>
                     <Link

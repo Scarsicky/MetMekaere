@@ -3,8 +3,10 @@
 import { adminError, adminOk, type AdminActionState } from '@/lib/admin/action-state';
 import { requireAdmin } from '@/lib/admin/auth';
 import { revalidateProducts } from '@/lib/admin/revalidate';
+import { getPickupMethodNames } from '@/lib/data/catalog';
 import { getGeneralSettings } from '@/lib/data/settings';
-import { sendCancellationNotice, sendShippingNotice } from '@/lib/mail';
+import { sendCancellationNotice, sendPickupNotice, sendShippingNotice } from '@/lib/mail';
+import { isPickupOrder } from '@/lib/shop/order-rules';
 import {
   getOrder,
   markOrderShipped,
@@ -20,14 +22,21 @@ function text(formData: FormData, key: string): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-export async function markShippedAction(
+/**
+ * De bestelling afhandelen: verstuurd of opgehaald.
+ *
+ * Eén handeling met twee gezichten. Wat het wordt, bepaalt de bestelling zelf
+ * — niet een keuze van de beheerder, want de klant koos bij het afrekenen al
+ * of hij hem kwam halen. Zou dat hier opnieuw te kiezen zijn, dan is dat een
+ * kans om het verkeerd te doen zonder dat er iets mee gewonnen wordt.
+ */
+export async function markFulfilledAction(
   _prev: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
   await requireAdmin();
 
   const id = text(formData, 'id');
-  const trackingCode = text(formData, 'trackingCode');
   const notify = formData.get('notify') !== 'nee';
 
   const order = await getOrder(id);
@@ -36,22 +45,30 @@ export async function markShippedAction(
     return adminError('Deze bestelling is nog niet betaald.');
   }
 
+  const pickup = isPickupOrder(order, await getPickupMethodNames());
+  // Bij ophalen valt er niets te volgen, dus ook geen code om te bewaren.
+  const trackingCode = pickup ? '' : text(formData, 'trackingCode');
+
   await markOrderShipped(id, trackingCode);
+
+  const gedaan = pickup ? 'Gemarkeerd als opgehaald' : 'Gemarkeerd als verstuurd';
 
   if (notify) {
     const general = await getGeneralSettings();
     const updated = await getOrder(id);
     if (updated) {
-      const result = await sendShippingNotice(updated, general);
+      const result = pickup
+        ? await sendPickupNotice(updated, general)
+        : await sendShippingNotice(updated, general);
       if (!result.sent) {
         return adminOk(
-          `Gemarkeerd als verstuurd. De mail aan de klant ging niet weg (${result.reason ?? 'onbekende reden'}).`,
+          `${gedaan}. De mail aan de klant ging niet weg (${result.reason ?? 'onbekende reden'}).`,
         );
       }
     }
   }
 
-  return adminOk(notify ? 'Verstuurd. De klant heeft bericht gekregen.' : 'Gemarkeerd als verstuurd.');
+  return adminOk(notify ? `${gedaan}. De klant heeft bericht gekregen.` : `${gedaan}.`);
 }
 
 /**

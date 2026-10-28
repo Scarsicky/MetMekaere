@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import {
   cancelOrderAction,
-  markShippedAction,
+  markFulfilledAction,
   refreshPaymentAction,
   refundOrderAction,
 } from '@/app/admin/actions/orders';
@@ -14,7 +14,7 @@ import { ActionButton } from '@/components/admin/save-form';
 import { Button } from '@/components/ui/button';
 import { Checkbox, Field, Input } from '@/components/ui/field';
 import { ADMIN_INITIAL_STATE, type AdminActionState } from '@/lib/admin/action-state';
-import { canSyncWithPayment } from '@/lib/shop/order-rules';
+import { canSyncWithPayment, fulfilmentWords } from '@/lib/shop/order-rules';
 import { cn } from '@/lib/utils';
 import type { Order } from '@/types';
 
@@ -38,14 +38,19 @@ function Submit({
 /**
  * De knoppen bij één bestelling.
  *
- * 'Verstuurd' is de handeling die je het vaakst doet, dus die staat vooraan met
- * een veld voor de Track & Trace-code erbij. De rest — opnieuw ophalen,
+ * Afhandelen is de handeling die je het vaakst doet, dus die staat vooraan.
+ * Bij verzenden hoort daar een veld voor de Track & Trace-code bij; bij
+ * ophalen niet, want er valt niets te volgen. De rest — opnieuw ophalen,
  * annuleren, terugbetalen — staat eronder en vraagt om bevestiging.
+ *
+ * Of het verzenden of ophalen wordt, is hier geen keuze: dat koos de klant al
+ * bij het afrekenen. Zie `isPickupOrder`.
  */
-export function OrderActions({ order }: { order: Order }) {
-  const [state, action] = useActionState(markShippedAction, ADMIN_INITIAL_STATE);
+export function OrderActions({ order, pickup }: { order: Order; pickup: boolean }) {
+  const [state, action] = useActionState(markFulfilledAction, ADMIN_INITIAL_STATE);
   const router = useRouter();
   const trackingId = useId();
+  const words = fulfilmentWords(pickup);
 
   useEffect(() => {
     if (state.status === 'ok') router.refresh();
@@ -74,25 +79,31 @@ export function OrderActions({ order }: { order: Order }) {
         <form action={action} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={order.id} />
 
-          <Field
-            label="Track & Trace-code"
-            htmlFor={trackingId}
-            optional
-            hint="Als je die hebt. De klant krijgt hem in de mail."
-          >
-            <Input id={trackingId} name="trackingCode" defaultValue={order.trackingCode ?? ''} />
-          </Field>
+          {pickup ? (
+            <p className="text-sm text-sand-600">
+              Deze bestelling wordt opgehaald ({order.shippingMethod}).
+            </p>
+          ) : (
+            <Field
+              label="Track & Trace-code"
+              htmlFor={trackingId}
+              optional
+              hint="Als je die hebt. De klant krijgt hem in de mail."
+            >
+              <Input id={trackingId} name="trackingCode" defaultValue={order.trackingCode ?? ''} />
+            </Field>
+          )}
 
           <Checkbox
             name="notify"
             value="ja"
             defaultChecked
             label="De klant een mailtje sturen"
-            description="‘Je bestelling is onderweg’, met de code erbij."
+            description={words.mailHint}
           />
 
           <div>
-            <Submit label={isDone ? 'Gegevens bijwerken' : 'Markeer als verstuurd'} />
+            <Submit label={isDone ? words.again : words.action} />
           </div>
         </form>
       ) : null}

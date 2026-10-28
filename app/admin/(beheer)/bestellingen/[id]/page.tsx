@@ -1,10 +1,16 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { ORDER_STATUS_LABELS } from '@/app/admin/(beheer)/page';
 import { OrderActions } from '@/app/admin/(beheer)/bestellingen/[id]/ship-form';
 import { AdminCard, AdminPage, StatusPill } from '@/components/admin/ui';
 import { formatCents } from '@/lib/money';
+import { getPickupMethodNames } from '@/lib/data/catalog';
+import {
+  addressHeading,
+  isPickupOrder,
+  orderStatusLabel,
+  shippingLineLabel,
+} from '@/lib/shop/order-rules';
 import { getOrder } from '@/lib/shop/orders';
 import { formatDateNL } from '@/lib/utils';
 import type { Address } from '@/types';
@@ -48,7 +54,9 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
   const order = await getOrder(id);
   if (!order) notFound();
 
-  const status = ORDER_STATUS_LABELS[order.status];
+  const pickupMethods = await getPickupMethodNames();
+  const pickup = isPickupOrder(order, pickupMethods);
+  const status = orderStatusLabel(order, pickupMethods);
   const oversold = (order as unknown as { oversold?: { title: string; shortBy: number }[] }).oversold;
 
   return (
@@ -117,7 +125,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                 />
               ) : null}
               <Row
-                label={`Verzending · ${order.shippingMethod}`}
+                label={shippingLineLabel(order, pickupMethods)}
                 value={order.shippingCents === 0 ? 'Gratis' : formatCents(order.shippingCents)}
               />
               <div className="flex justify-between border-t border-sand-300 pt-3">
@@ -146,7 +154,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
 
         <div className="flex flex-col gap-6">
           <AdminCard title="Afhandelen">
-            <OrderActions order={order} />
+            <OrderActions order={order} pickup={pickup} />
           </AdminCard>
 
           <AdminCard title="Klant">
@@ -164,7 +172,10 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                 ) : null}
               </div>
 
-              <AddressBlock address={order.shipping} title="Bezorgadres" />
+              <AddressBlock
+                address={order.shipping}
+                title={addressHeading(pickup, true)}
+              />
               {order.billing ? <AddressBlock address={order.billing} title="Factuuradres" /> : null}
 
               <div className="border-t border-sand-200 pt-3 text-sand-600">

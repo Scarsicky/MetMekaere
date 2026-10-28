@@ -469,6 +469,7 @@ export function priceCart(input: PriceCartInput): PricedCart {
     shippingOptions,
     shippingRateId: chosen?.id ?? null,
     shippingName: chosen?.name,
+    shippingIsPickup: chosen?.isPickup ?? false,
     shippingCents,
     totalWeightGrams,
     totalCents,

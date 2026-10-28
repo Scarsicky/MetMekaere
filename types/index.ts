@@ -303,6 +303,8 @@ export interface PricedCart {
   shippingOptions: ShippingOption[];
   shippingRateId?: string | null;
   shippingName?: string;
+  /** Gekozen methode is ophalen; gaat mee de bestelling in. */
+  shippingIsPickup: boolean;
   shippingCents: Cents;
   totalWeightGrams: number;
   totalCents: Cents;
@@ -362,6 +364,14 @@ export interface Order {
   discountCode?: string | null;
   discountCents: Cents;
   shippingMethod: string;
+  /**
+   * Haalt de klant deze bestelling zelf op?
+   *
+   * Wordt bij het plaatsen vastgelegd en daarna niet meer aangeraakt, ook niet
+   * als de verzendmethode later wordt hernoemd of weggehaald. Bestellingen van
+   * vóór 28 oktober 2026 hebben dit veld niet; zie `isPickupOrder`.
+   */
+  shippingIsPickup?: boolean;
   shippingCents: Cents;
   totalCents: Cents;
   vatBreakdown: VatLine[];
@@ -387,7 +397,12 @@ export interface Order {
   adminClosed?: boolean;
   createdAt: Millis;
   paidAt?: Millis | null;
+  /**
+   * Wanneer de bestelling de deur uit ging — verstuurd of opgehaald. Eén veld
+   * voor allebei, want het is dezelfde gebeurtenis: afgehandeld.
+   */
   shippedAt?: Millis | null;
+  /** Alleen bij verzenden; bij ophalen valt er niets te volgen. */
   trackingCode?: string | null;
 }
 
