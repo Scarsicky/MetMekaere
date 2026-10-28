@@ -410,6 +410,10 @@ export async function sendShippingNotice(order: Order, general: GeneralSettings)
  * klopt van geen kant als iemand hem net in de winkel heeft meegenomen. Deze
  * mail brengt geen nieuws — de klant stond erbij — maar sluit de bestelling
  * netjes af en geeft hem iets om later terug te zoeken.
+ *
+ * Er is met opzet géén mail 'je bestelling ligt klaar'. Ophalen gaat hier op
+ * afspraak, en dat gesprek voeren de eigenaren zelf. Een automatisch bericht
+ * zou dan naast die afspraak gaan staan in plaats van erin passen.
  */
 export async function sendPickupNotice(order: Order, general: GeneralSettings): Promise<MailResult> {
   const subject = `Je bestelling ${order.orderNumber} is opgehaald`;

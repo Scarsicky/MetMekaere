@@ -11,6 +11,7 @@ import {
   getActiveProducts,
   getCategories,
   getProductBySlug,
+  getShippingRates,
   getTierRules,
   isPurchasable,
 } from '@/lib/data/catalog';
@@ -22,6 +23,7 @@ import {
   jsonLdScript,
   metaDescription,
   productJsonLd,
+  shippingCountries,
 } from '@/lib/seo';
 import { MAX_LINE_QTY } from '@/lib/shop/cart';
 import { tierPreviewForProduct } from '@/lib/shop/pricing';
@@ -53,12 +55,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const [product, tierRules, categories, general, allProducts] = await Promise.all([
+  const [product, tierRules, categories, general, allProducts, shippingRates] = await Promise.all([
     getProductBySlug(slug),
     getTierRules(),
     getCategories(),
     getGeneralSettings(),
     getActiveProducts(),
+    getShippingRates(),
   ]);
 
   if (!product || product.status !== 'active') notFound();
@@ -232,7 +235,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product, general))}
+        dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product, general, shippingCountries(shippingRates)))}
       />
       <script
         type="application/ld+json"

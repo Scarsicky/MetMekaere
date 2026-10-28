@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ButtonLink } from '@/components/ui/button';
 import { Container, Section, SectionHeading } from '@/components/ui/section';
 import { Prose } from '@/components/ui/prose';
+import { formatCents } from '@/lib/money';
 import { getHappeningBySlug, getHappenings } from '@/lib/data/content';
 import { getGeneralSettings } from '@/lib/data/settings';
 import {
@@ -149,9 +150,23 @@ export default async function HappeningPage({ params }: { params: Promise<{ slug
                   </Detail>
                 ) : null}
 
-                {happening.priceLabel ? (
+                {/*
+                  Het bedrag staat voorop, de vrije tekst erachter. Staat er
+                  geen bedrag, dan is die tekst het hele antwoord — zo blijven
+                  activiteiten van vóór het prijsveld gewoon kloppen.
+                */}
+                {happening.priceCents != null || happening.priceLabel ? (
                   <Detail icon="💶" label="Kosten">
-                    {happening.priceLabel}
+                    {[
+                      happening.priceCents != null
+                        ? happening.priceCents === 0
+                          ? 'Gratis'
+                          : formatCents(happening.priceCents)
+                        : null,
+                      happening.priceLabel,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </Detail>
                 ) : null}
               </dl>

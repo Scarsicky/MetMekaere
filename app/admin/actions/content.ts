@@ -11,6 +11,7 @@ import {
 } from '@/lib/admin/revalidate';
 import { normalizeBlocks } from '@/lib/data/normalize';
 import { adminDb } from '@/lib/firebase/admin';
+import { parseMoneyToCents } from '@/lib/money';
 import { randomId, slugify } from '@/lib/utils';
 
 /** Pagina's, activiteiten, dialectwoorden en de adventskalender. */
@@ -128,6 +129,7 @@ export async function saveHappeningAction(
     date: date || null,
     startTime: text(formData, 'startTime') || null,
     endTime: text(formData, 'endTime') || null,
+    priceCents: parseMoneyToCents(text(formData, 'priceCents')),
     priceLabel: text(formData, 'priceLabel') || null,
     signupUrl: text(formData, 'signupUrl') || null,
     membersOnly: checkbox(formData, 'membersOnly'),

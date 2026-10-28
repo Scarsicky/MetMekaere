@@ -158,7 +158,38 @@ export function websiteJsonLd(general: GeneralSettings) {
  * Productgegevens voor de zoekresultaten. `availability` vertelt Google of
  * iets te koop is; dat is precies waar de voorraadadministratie voor is.
  */
-export function productJsonLd(product: Product, general: GeneralSettings) {
+/**
+ * Het retourbeleid, in machinetaal.
+ *
+ * Dit zegt letterlijk wat er op de pagina *Verzenden en retour* staat:
+ * veertien dagen bedenktijd, zelf ongebruikt terugsturen, en de kosten van dat
+ * terugsturen zijn voor de klant. Google kan dit bij het zoekresultaat tonen.
+ *
+ * Verandert die pagina, dan moet dit mee. Anders beloven we op hetzelfde adres
+ * twee verschillende dingen — en de versie die een klant leest is niet
+ * degene waar een zoekmachine zich op baseert.
+ */
+const RETURN_WINDOW_DAYS = 14;
+
+function merchantReturnPolicy(countries: string[]) {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    // Waar we naartoe sturen, komt uit de verzendmethodes zelf: dan klopt dit
+    // vanzelf zodra er een land bijkomt.
+    applicableCountry: countries.length ? countries : ['NL'],
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: RETURN_WINDOW_DAYS,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    // De klant regelt en betaalt het terugsturen zelf.
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibleForShipping',
+  };
+}
+
+export function productJsonLd(
+  product: Product,
+  general: GeneralSettings,
+  returnCountries: string[] = [],
+) {
   const inStock =
     !product.stock.tracked || product.stock.allowBackorder || product.stock.quantity > 0;
 
@@ -178,8 +209,22 @@ export function productJsonLd(product: Product, general: GeneralSettings) {
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: general.siteName },
+      hasMerchantReturnPolicy: merchantReturnPolicy(returnCountries),
     },
   };
+}
+
+/** De landen waar we naartoe sturen, uit de verzendmethodes. */
+export function shippingCountries(rates: { countries: string[]; active: boolean }[]): string[] {
+  const seen = new Set<string>();
+  for (const rate of rates) {
+    if (!rate.active) continue;
+    for (const country of rate.countries) {
+      const code = country.trim().toUpperCase();
+      if (code) seen.add(code);
+    }
+  }
+  return [...seen].sort();
 }
 
 export function breadcrumbJsonLd(trail: { name: string; href: string }[]) {
@@ -217,6 +262,26 @@ export function eventJsonLd(happening: Happening, general: GeneralSettings) {
       : {}),
     organizer: { '@type': 'Organization', name: general.siteName, url: siteUrl() },
     url: absoluteUrl(`/doen-en-beleven/${happening.slug}`),
+    /*
+     * Wat deelnemen kost. Alleen meesturen als er echt een bedrag bekend is:
+     * een prijs raden uit een vrije tekst als 'bijdrage voor materialen' levert
+     * een getal op dat in Google komt te staan en nergens op slaat.
+     *
+     * Gratis is wél een bedrag — dat is 0, en dat mag iedereen weten.
+     */
+    ...(happening.priceCents != null
+      ? {
+          offers: {
+            '@type': 'Offer',
+            price: (happening.priceCents / 100).toFixed(2),
+            priceCurrency: 'EUR',
+            availability: 'https://schema.org/InStock',
+            // Waar je je aanmeldt: de eigen pagina als er geen link is.
+            url: happening.signupUrl || absoluteUrl(`/doen-en-beleven/${happening.slug}`),
+            validFrom: new Date(happening.createdAt).toISOString(),
+          },
+        }
+      : {}),
   };
 }
 

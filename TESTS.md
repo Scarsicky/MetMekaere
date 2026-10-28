@@ -138,6 +138,18 @@ echte klanten binnen.
       Hernoem je die methode, dan gaat zo'n oude bestelling weer over versturen
       praten — niet mooi, maar wel de veilige kant.
 
+### Gestructureerde gegevens voor Google
+
+- [ ] **De kosten bij een activiteit invullen** (nieuw, 28 oktober 2026). Bij
+      *Doen en Beleven* staat nu een veld voor het bedrag in euro's, met de
+      vrije tekst als toelichting erachter. Vul 0 in voor gratis en laat het
+      leeg als er geen vaste prijs is — dan komt er ook geen prijs in Google
+      te staan, en dat is beter dan een verzonnen bedrag.
+- [ ] **Nakijken bij Google.** Plak een productpagina en een activiteit met
+      datum in de Rich Results Test van Google. Bij het product hoort het
+      retourbeleid te staan (veertien dagen), bij de activiteit de prijs.
+      Search Console zelf loopt een paar dagen achter.
+
 ### Beveiliging
 
 - [x] **Firestore-regels worden afgedwongen.** Van buitenaf geprobeerd te lezen

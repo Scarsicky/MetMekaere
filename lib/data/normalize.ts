@@ -493,6 +493,7 @@ export function normalizeHappening(id: string, raw: Raw): Happening {
     date: optionalStr(raw.date) ?? null,
     startTime: optionalStr(raw.startTime),
     endTime: optionalStr(raw.endTime),
+    priceCents: typeof raw.priceCents === 'number' ? Math.round(raw.priceCents) : null,
     priceLabel: optionalStr(raw.priceLabel),
     signupUrl: optionalStr(raw.signupUrl) ?? null,
     membersOnly: bool(raw.membersOnly, false),

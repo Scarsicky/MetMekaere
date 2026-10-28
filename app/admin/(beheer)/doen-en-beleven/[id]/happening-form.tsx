@@ -7,6 +7,7 @@ import { ImageManager } from '@/components/admin/image-manager';
 import { ActionButton, SaveForm } from '@/components/admin/save-form';
 import { AdminCard } from '@/components/admin/ui';
 import { Checkbox, Field, Input, Select, Textarea } from '@/components/ui/field';
+import { centsToInput } from '@/lib/money';
 import { slugify } from '@/lib/utils';
 import { HAPPENING_THEMES, type Happening } from '@/types';
 
@@ -126,10 +127,33 @@ export function HappeningForm({ happening }: { happening: Happening | null }) {
             <Field label="Locatie" htmlFor="location" optional>
               <Input id="location" name="location" defaultValue={happening?.location ?? ''} />
             </Field>
-            <Field label="Kosten" htmlFor="priceLabel" optional hint="Vrije tekst, bijv. ‘Gratis’.">
-              <Input id="priceLabel" name="priceLabel" defaultValue={happening?.priceLabel ?? ''} />
+            <Field
+              label="Kosten"
+              htmlFor="priceCents"
+              optional
+              hint="Bedrag in euro’s, bijvoorbeeld 12,50. Vul 0 in voor gratis, of laat leeg als er geen vaste prijs is."
+            >
+              <Input
+                id="priceCents"
+                name="priceCents"
+                inputMode="decimal"
+                defaultValue={
+                  happening?.priceCents === null || happening?.priceCents === undefined
+                    ? ''
+                    : centsToInput(happening.priceCents)
+                }
+              />
             </Field>
           </div>
+
+          <Field
+            label="Toelichting bij de kosten"
+            htmlFor="priceLabel"
+            optional
+            hint="Komt achter het bedrag te staan, bijvoorbeeld ‘inclusief koffie’. Staat er geen bedrag, dan is dit wat de bezoeker leest."
+          >
+            <Input id="priceLabel" name="priceLabel" defaultValue={happening?.priceLabel ?? ''} />
+          </Field>
 
           <Field
             label="Aanmeldlink"

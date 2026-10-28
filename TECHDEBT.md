@@ -183,6 +183,45 @@ aan de orderafhandeling verandert.
 
 ## Bewuste keuzes
 
+### Niet alles wat Search Console voorstelt is een gebrek
+
+Google meldt bij gestructureerde gegevens ook wat je *nog méér* zou kunnen
+aanleveren. Dat leest als een lijst gebreken, maar het zijn aanbevelingen; de
+zoekresultaten werken zonder. Op 28 oktober 2026 kwamen er zes langs. Twee zijn
+gedaan, vier bewust niet:
+
+- **`hasMerchantReturnPolicy`** — gedaan. Staat in `lib/seo.ts` en zegt
+  letterlijk wat de pagina *Verzenden en retour* belooft. **Verandert die
+  pagina, dan moet dat blokje mee**, anders beloven we op hetzelfde adres twee
+  verschillende dingen.
+- **Evenement `offers`** — gedaan, met een echt prijsveld in het beheer. Staat
+  er geen bedrag, dan komt er ook geen prijs in Google.
+- **`shippingDetails`** — niet gedaan. Onze verzendkosten hangen af van
+  gewichtsklasse, land én of de bestelling boven de grens voor gratis
+  verzenden uitkomt. In zo'n blokje past één getal, en dat getal zou dus
+  regelmatig onwaar zijn. Liever niets dan een prijs die niet klopt.
+- **Evenement `performer`** — niet gedaan. Past bij een optreden, niet bij een
+  workshop of een wandeling, en er is geen veld voor. Weinig winst.
+- **`review` en `aggregateRating`** — niet gedaan, en dit is de enige waar een
+  verkeerde reactie echt schade doet. Wij verzamelen geen beoordelingen, dus er
+  valt niets in te vullen. Ze zelf schrijven is in strijd met het beleid van
+  Google, en de straf is dat je de hele rich result kwijtraakt — ook de prijs
+  en de voorraadstand die nu wél werken.
+
+*Aanleiding om terug te komen:* bij `shippingDetails` als de verzendtarieven
+ooit één vast bedrag worden. Bij `review` alleen als jullie echt beoordelingen
+van klanten gaan verzamelen; dat is een project op zich — ophalen, nakijken,
+tonen, privacy — en geen SEO-reparatie.
+
+### Geen mail dat een bestelling klaarligt
+
+Ophalen gaat op afspraak. Dat gesprek voeren jullie zelf, en een automatisch
+bericht zou daar naast gaan staan in plaats van erin passen. De mail die er
+wél is, bevestigt achteraf dát de bestelling is opgehaald, en sluit hem af.
+
+*Aanleiding om terug te komen:* als ophalen ooit zonder afspraak kan — dan is
+'je kunt hem komen halen' ineens het nuttigste bericht van de twee.
+
 ### Geen Content Security Policy
 
 Een beveiligingsscan vraagt er altijd om, en bij een webshop is dat meestal

@@ -523,6 +523,12 @@ export interface Happening {
   date?: string | null;
   startTime?: string;
   endTime?: string;
+  /**
+   * Wat deelnemen kost, in centen. 0 is gratis; niets ingevuld betekent 'geen
+   * vaste prijs' — dan staat er ook geen prijs in de zoekresultaten.
+   */
+  priceCents?: Cents | null;
+  /** Vrije tekst naast het bedrag, bijvoorbeeld 'inclusief koffie'. */
   priceLabel?: string;
   /** Aanmeldlink of externe pagina. */
   signupUrl?: string | null;
